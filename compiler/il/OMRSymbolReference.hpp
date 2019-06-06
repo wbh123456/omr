@@ -55,7 +55,6 @@ namespace TR { class Register; }
 namespace TR { class ResolvedMethodSymbol; }
 namespace TR { class SymbolReference; }
 template <class T> class TR_Array;
-template <uint32_t> class TR_NodeAliasSetInterface;
 template <uint32_t> class TR_SymAliasSetInterface;
 typedef TR::SparseBitVector SharedSparseBitVector;
 
@@ -309,9 +308,6 @@ protected:
                    const char *               name);
 
    friend class ::TR_Debug;
-
-   template <uint32_t>
-   friend class ::TR_NodeAliasSetInterface;
 
    template <uint32_t>
    friend class ::TR_SymAliasSetInterface;

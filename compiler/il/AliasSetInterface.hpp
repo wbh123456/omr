@@ -246,9 +246,19 @@ typedef enum {
 template <uint32_t _aliasSetType>
 class TR_SymAliasSetInterface : public TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> > {
 public:
+//initialize from symref directly (independent from node)
   TR_SymAliasSetInterface(TR::SymbolReference *symRef, bool isDirectCall = false, bool includeGCSafePoint = false) :
     TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-    _symbolReference(symRef) {}
+    _symbolReference(symRef),
+    _node(NULL),
+    _from_node(false) {}
+
+//initialize from node
+  TR_SymAliasSetInterface(TR::Node *node, bool isDirectCall = false, bool includeGCSafePoint = false) :
+   TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
+      _symbolReference(NULL),
+      _node(node),
+      _from_node(true) {}
 
    TR_BitVector *getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint);
 
@@ -289,6 +299,10 @@ private:
     static void setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value);
 
   TR::SymbolReference *_symbolReference;
+  ///the node which initializes this class(if the class is initialized through a node)
+  TR::Node *_node;
+  ///indicates if the class in initialized through a node.
+  bool _from_node;
 };
 
 struct TR_UseDefAliasSetInterface : public TR_SymAliasSetInterface<useDefAliasSet> {
@@ -305,6 +319,23 @@ struct TR_UseOnlyAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasS
                               bool includeGCSafePoint = false) :
   TR_SymAliasSetInterface<UseOnlyAliasSet>
     (symRef, isDirectCall, includeGCSafePoint) {}
+};
+
+//Alias interface initialized from Node
+struct TR_NodeUseAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasSet> {
+  TR_NodeUseAliasSetInterface(TR::Node *node,
+                              bool isDirectCall = false,
+                              bool includeGCSafePoint = false) :
+  TR_SymAliasSetInterface<UseOnlyAliasSet>
+    (node, isDirectCall, includeGCSafePoint) {}
+};
+
+struct TR_NodeKillAliasSetInterface: public TR_SymAliasSetInterface<useDefAliasSet> {
+  TR_NodeKillAliasSetInterface(TR::Node *node,
+                               bool isDirectCall = false,
+                               bool includeGCSafePoint = false) :
+    TR_SymAliasSetInterface<useDefAliasSet>
+     (node, isDirectCall, includeGCSafePoint) {}
 };
 
 template <uint32_t _aliasSetType> inline
@@ -403,13 +434,47 @@ void TR_SymAliasSetInterface<_aliasSetType>::setSymRef1KillsSymRef2Asymmetricall
 template <> inline
 TR_BitVector *TR_SymAliasSetInterface<useDefAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
    {
-   return _symbolReference->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
+   //if the class is called from node class
+   if(_from_node)
+      {
+      TR::Compilation *comp = TR::comp();
+      TR_BitVector *bv = NULL;
+
+      if (_node->getOpCode().hasSymbolReference() && (_node->getOpCode().isLikeDef() || _node->mightHaveVolatileSymbolReference())) //we want the old behavior in these cases
+         {
+         if (_node->getSymbolReference()->sharesSymbol(includeGCSafePoint))
+            bv = _node->getSymbolReference()->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
+         else
+            {
+            bv = new (comp->aliasRegion()) TR_BitVector(comp->getSymRefCount(), comp->aliasRegion(), growable);
+            bv->set(_node->getSymbolReference()->getReferenceNumber());
+            }
+         }
+
+      // else there is no symbol reference associated with the node, we return an empty bit container
+      return bv;
+      }
+   else
+      return _symbolReference->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
    }
 
 template <> inline
 TR_BitVector *TR_SymAliasSetInterface<UseOnlyAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
    {
-   return _symbolReference->getUseonlyAliasesBV(TR::comp()->getSymRefTab());
+   //if the class is called from node class
+   if(_from_node)
+      {
+      TR::Compilation *comp = TR::comp();
+      TR_BitVector *bv = NULL;
+
+      if (_node->getOpCode().isLikeUse() && _node->getOpCode().hasSymbolReference())
+         bv = _node->getSymbolReference()->getUseonlyAliasesBV(comp->getSymRefTab());
+      // else there is no symbol reference associated with the node, we return an empty bit container
+
+      return bv;
+      }
+   else  
+      return _symbolReference->getUseonlyAliasesBV(TR::comp()->getSymRefTab());
    }
 
 template <class T>
@@ -440,80 +505,6 @@ void CountUseDefAliases( T& t, const TR::SparseBitVector &syms)
          }
       }
    }
-
-
-////NODE ALIASING
-
-typedef enum {
-   mayUseAliasSet,
-   mayKillAliasSet
-} TR_NodeAliasSetType;
-
-template <uint32_t _aliasSetType>
-class TR_NodeAliasSetInterface : public TR_AliasSetInterface<TR_NodeAliasSetInterface<_aliasSetType> > {
-public:
-   TR_NodeAliasSetInterface(TR::Node *node, bool isDirectCall = false, bool includeGCSafePoint = false) :
-      TR_AliasSetInterface<TR_NodeAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-        _node(node) {}
-
-   TR_BitVector *getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint);
-
-private:
-  TR::Node            *_node;
-};
-
-template<> inline
-TR_BitVector *TR_NodeAliasSetInterface<mayUseAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
-   {
-   TR::Compilation *comp = TR::comp();
-   TR_BitVector *bv = NULL;
-
-   if (_node->getOpCode().isLikeUse() && _node->getOpCode().hasSymbolReference())
-      bv = _node->getSymbolReference()->getUseonlyAliasesBV(comp->getSymRefTab());
-   // else there is no symbol reference associated with the node, we return an empty bit container
-
-   return bv;
-   }
-
-template<> inline
-TR_BitVector *TR_NodeAliasSetInterface<mayKillAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
-   {
-   TR::Compilation *comp = TR::comp();
-   TR_BitVector *bv = NULL;
-
-   if (_node->getOpCode().hasSymbolReference() && (_node->getOpCode().isLikeDef() || _node->mightHaveVolatileSymbolReference())) //we want the old behavior in these cases
-      {
-      if (_node->getSymbolReference()->sharesSymbol(includeGCSafePoint))
-         bv = _node->getSymbolReference()->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
-      else
-         {
-         bv = new (comp->aliasRegion()) TR_BitVector(comp->getSymRefCount(), comp->aliasRegion(), growable);
-         bv->set(_node->getSymbolReference()->getReferenceNumber());
-         }
-      }
-
-   // else there is no symbol reference associated with the node, we return an empty bit container
-   return bv;
-   }
-
-struct TR_NodeUseAliasSetInterface: public TR_NodeAliasSetInterface<mayUseAliasSet> {
-  TR_NodeUseAliasSetInterface(TR::Node *node,
-                              bool isDirectCall = false,
-                              bool includeGCSafePoint = false) :
-  TR_NodeAliasSetInterface<mayUseAliasSet>
-    (node, isDirectCall, includeGCSafePoint) {}
-};
-
-struct TR_NodeKillAliasSetInterface: public TR_NodeAliasSetInterface<mayKillAliasSet> {
-  TR_NodeKillAliasSetInterface(TR::Node *node,
-                               bool isDirectCall = false,
-                               bool includeGCSafePoint = false) :
-    TR_NodeAliasSetInterface<mayKillAliasSet>
-     (node, isDirectCall, includeGCSafePoint) {}
-};
-
-
-///////////////////////////////////////
 
 
 inline TR_UseOnlyAliasSetInterface
