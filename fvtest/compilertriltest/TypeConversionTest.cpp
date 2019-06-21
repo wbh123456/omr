@@ -128,7 +128,7 @@ TEST_P(Int8ToInt32, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int8ToInt32, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int8_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(int8_t)>("b2i", b2i)
+        std::tuple<const char*, int32_t(*)(int8_t)>("b2i", b2i)
     )));
 
 class UInt8ToInt32 : public TRTest::UnaryOpTest<int32_t,uint8_t> {};
@@ -188,7 +188,7 @@ TEST_P(UInt8ToInt32, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, UInt8ToInt32, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<uint8_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(uint8_t)>("bu2i", bu2i)
+        std::tuple<const char*, int32_t(*)(uint8_t)>("bu2i", bu2i)
     )));
 
 class Int8ToInt64 : public TRTest::UnaryOpTest<int64_t,int8_t> {};
@@ -248,7 +248,7 @@ TEST_P(Int8ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int8ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int8_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(int8_t)>("b2l", b2l)
+        std::tuple<const char*, int64_t(*)(int8_t)>("b2l", b2l)
     )));
 
 class UInt8ToInt64 : public TRTest::UnaryOpTest<int64_t,uint8_t> {};
@@ -308,7 +308,7 @@ TEST_P(UInt8ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, UInt8ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<uint8_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(uint8_t)>("bu2l", bu2l)
+        std::tuple<const char*, int64_t(*)(uint8_t)>("bu2l", bu2l)
     )));
 
 class Int16ToInt32 : public TRTest::UnaryOpTest<int32_t,int16_t> {};
@@ -368,7 +368,7 @@ TEST_P(Int16ToInt32, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int16ToInt32, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int16_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(int16_t)>("s2i", s2i)
+        std::tuple<const char*, int32_t(*)(int16_t)>("s2i", s2i)
     )));
 
 class UInt16ToInt32 : public TRTest::UnaryOpTest<int32_t,uint16_t> {};
@@ -428,7 +428,7 @@ TEST_P(UInt16ToInt32, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, UInt16ToInt32, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<uint16_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(uint16_t)>("su2i", su2i)
+        std::tuple<const char*, int32_t(*)(uint16_t)>("su2i", su2i)
     )));
 
 class Int16ToInt64 : public TRTest::UnaryOpTest<int64_t,int16_t> {};
@@ -488,7 +488,7 @@ TEST_P(Int16ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int16ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int16_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(int16_t)>("s2l", s2l)
+        std::tuple<const char*, int64_t(*)(int16_t)>("s2l", s2l)
     )));
 
 class UInt16ToInt64 : public TRTest::UnaryOpTest<int64_t,uint16_t> {};
@@ -548,7 +548,7 @@ TEST_P(UInt16ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, UInt16ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<uint16_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(uint16_t)>("su2l", su2l)
+        std::tuple<const char*, int64_t(*)(uint16_t)>("su2l", su2l)
     )));
 
 class Int32ToInt64 : public TRTest::UnaryOpTest<int64_t,int32_t> {};
@@ -604,7 +604,7 @@ TEST_P(Int32ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int32ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int32_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(int32_t)>("i2l", i2l)
+        std::tuple<const char*, int64_t(*)(int32_t)>("i2l", i2l)
     )));
 
 class UInt32ToInt64 : public TRTest::UnaryOpTest<int64_t,uint32_t> {};
@@ -660,7 +660,7 @@ TEST_P(UInt32ToInt64, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, UInt32ToInt64, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<uint32_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(uint32_t)>("iu2l", iu2l)
+        std::tuple<const char*, int64_t(*)(uint32_t)>("iu2l", iu2l)
     )));
 
 int32_t l2i(int64_t x) {
@@ -720,7 +720,7 @@ TEST_P(Int64ToInt32, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int64ToInt32, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int64_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(int64_t)>("l2i", l2i)
+        std::tuple<const char*, int32_t(*)(int64_t)>("l2i", l2i)
     )));
 
 #ifndef TR_TARGET_POWER
@@ -793,7 +793,7 @@ TEST_P(Int32ToFloat, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int32ToFloat, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int32_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, float(*)(int32_t)>("i2f", i2f)
+        std::tuple<const char*, float(*)(int32_t)>("i2f", i2f)
     )));
 
 class Int64ToFloat : public TRTest::UnaryOpTest<float,int64_t> {};
@@ -849,7 +849,7 @@ TEST_P(Int64ToFloat, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int64ToFloat, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int64_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, float(*)(int64_t)>("l2f", l2f)
+        std::tuple<const char*, float(*)(int64_t)>("l2f", l2f)
     )));
 
 class Int32ToDouble : public TRTest::UnaryOpTest<double,int32_t> {};
@@ -905,7 +905,7 @@ TEST_P(Int32ToDouble, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int32ToDouble, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int32_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, double(*)(int32_t)>("i2d", i2d)
+        std::tuple<const char*, double(*)(int32_t)>("i2d", i2d)
     )));
 
 class Int64ToDouble : public TRTest::UnaryOpTest<double,int64_t> {};
@@ -961,7 +961,7 @@ TEST_P(Int64ToDouble, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int64ToDouble, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_values<int64_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, double(*)(int64_t)>("l2d", l2d)
+        std::tuple<const char*, double(*)(int64_t)>("l2d", l2d)
     )));
 #endif
 
@@ -1054,7 +1054,7 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, FloatToInt32, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<float>(), fp_filter<float, int32_t>)),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(float)>("f2i", f2i)
+        std::tuple<const char*, int32_t(*)(float)>("f2i", f2i)
     )));
 
 class FloatToInt64 : public TRTest::UnaryOpTest<int64_t,float> {};
@@ -1111,7 +1111,7 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, FloatToInt64, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<float>(), fp_filter<float, int64_t>)),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(float)>("f2l", f2l)
+        std::tuple<const char*, int64_t(*)(float)>("f2l", f2l)
     )));
 
 class DoubleToInt32 : public TRTest::UnaryOpTest<int32_t,double> {};
@@ -1168,7 +1168,7 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, DoubleToInt32, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<double>(), fp_filter<double, int32_t>)),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(double)>("d2i", d2i)
+        std::tuple<const char*, int32_t(*)(double)>("d2i", d2i)
     )));
 
 class DoubleToInt64 : public TRTest::UnaryOpTest<int64_t,double> {};
@@ -1225,7 +1225,7 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, DoubleToInt64, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<double>(), fp_filter<double, int64_t>)),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(double)>("d2l", d2l)
+        std::tuple<const char*, int64_t(*)(double)>("d2l", d2l)
     )));
 
 template <typename T>
@@ -1305,7 +1305,7 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, FloatToDouble, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<float>(), smallFp_filter<float>)),
     ::testing::Values(
-        std::make_tuple<const char*, double(*)(float)>("f2d", f2d)
+        std::tuple<const char*, double(*)(float)>("f2d", f2d)
     )));
 
 class DoubleToFloat : public TRTest::UnaryOpTest<float,double> {};
@@ -1370,5 +1370,5 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, DoubleToFloat, ::testing::Combine(
     ::testing::ValuesIn(
         TRTest::filter(TRTest::const_values<double>(), smallFp_filter<double>)),
     ::testing::Values(
-        std::make_tuple<const char*, float(*)(double)>("d2f", d2f)
+        std::tuple<const char*, float(*)(double)>("d2f", d2f)
     )));

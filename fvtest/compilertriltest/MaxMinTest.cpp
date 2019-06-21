@@ -96,8 +96,8 @@ TEST_P(Int32MaxMin, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(MaxMin, Int32MaxMin, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_value_pairs<int32_t, int32_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int32_t(*)(int32_t, int32_t)>("imax", imax),
-        std::make_tuple<const char*, int32_t(*)(int32_t, int32_t)>("imin", imin))));
+        std::tuple<const char*, int32_t(*)(int32_t, int32_t)>("imax", imax),
+        std::tuple<const char*, int32_t(*)(int32_t, int32_t)>("imin", imin))));
 
 class Int64MaxMin : public TRTest::BinaryOpTest<int64_t> {};
 
@@ -157,5 +157,5 @@ TEST_P(Int64MaxMin, UsingLoadParam) {
 INSTANTIATE_TEST_CASE_P(MaxMin, Int64MaxMin, ::testing::Combine(
     ::testing::ValuesIn(TRTest::const_value_pairs<int64_t, int64_t>()),
     ::testing::Values(
-        std::make_tuple<const char*, int64_t(*)(int64_t, int64_t)>("lmax", lmax),
-        std::make_tuple<const char*, int64_t(*)(int64_t, int64_t)>("lmin", lmin))));
+        std::tuple<const char*, int64_t(*)(int64_t, int64_t)>("lmax", lmax),
+        std::tuple<const char*, int64_t(*)(int64_t, int64_t)>("lmin", lmin))));
