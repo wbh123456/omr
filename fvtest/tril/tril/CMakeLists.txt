@@ -116,6 +116,7 @@ target_include_directories(tril PUBLIC
 )
 
 target_link_libraries(tril PUBLIC
+	omr_base
 	${TRIL_BACKEND_LIB}
 	${CMAKE_DL_LIBS}
 )
