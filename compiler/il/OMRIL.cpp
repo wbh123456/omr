@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corp. and others
+ * Copyright (c) 2000, 2019 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -596,7 +596,6 @@ OMR::IL::opCodeForCorrespondingIndirectLoad(TR::ILOpCodes loadOpCode)
       case TR::aloadi: return TR::astorei;
       case TR::vloadi: return TR::vstorei;
       case TR::cloadi: return TR::cstorei;
-      case TR::buloadi: return TR::bustorei;
       case TR::iuload: return TR::iustore;
       case TR::iuloadi: return TR::iustorei;
       case TR::luloadi: return TR::lustorei;
@@ -635,7 +634,6 @@ OMR::IL::opCodeForCorrespondingIndirectStore(TR::ILOpCodes storeOpCode)
       case TR::awrtbari: return TR::aloadi;
       case TR::vstorei:  return TR::vloadi;
       case TR::cstorei:  return TR::cloadi;
-      case TR::bustorei: return TR::buloadi;
       case TR::iustore:  return TR::iuload;
       case TR::iustorei: return TR::iuloadi;
       case TR::lustorei: return TR::luloadi;
