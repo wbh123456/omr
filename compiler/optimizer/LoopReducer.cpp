@@ -357,18 +357,9 @@ TR_Arraycopy::checkArrayStore(TR::Node * storeNode)
 bool
 TR_ByteToCharArraycopy::checkArrayStore(TR::Node * storeNode)
    {
-   if (storeNode->getOpCodeValue() != TR::cstorei)
-      {
-      dumpOptDetails(comp(), "byte to char arraycopy arraystore tree does not have an indirect store as root\n");
-      return false;
-      }
-   TR::Node * storeFirstChild = storeNode->getFirstChild();
-   TR::ILOpCodes opCodeStoreFirstChild = storeFirstChild->getOpCodeValue();
-
-   bool checkStore = getStoreAddress()->checkAiadd(storeFirstChild, storeNode->getSize());
-
-   return checkStore;
-   }
+   dumpOptDetails(comp(), "byte to char arraycopy arraystore tree does not have an indirect store as root\n");
+   return false;
+   }  
 
 // Need to verify that the byte loads sub-tree looks like the following:
 // Will use checkAiadd() to verify the address children but need an additional
@@ -1694,7 +1685,7 @@ TR_Arraytranslate::checkLoad(TR::Node * loadNode)
 bool
 TR_Arraytranslate::checkStore(TR::Node * storeNode)
    {
-   if (storeNode->getOpCodeValue() != TR::cstorei && storeNode->getOpCodeValue() != TR::bstorei)
+   if ( storeNode->getOpCodeValue() != TR::bstorei)
       {
       dumpOptDetails(comp(), "...store tree does not have icstore/ibstore - no arraytranslate reduction\n");
       return false;
@@ -1750,14 +1741,7 @@ TR_Arraytranslate::checkStore(TR::Node * storeNode)
       }
    else
       {
-      if (storeNode->getOpCodeValue() == TR::cstorei)
-         {
-         _byteOutput = false;
-         }
-      else
-         {
-         _byteOutput = true;
-         }
+      _byteOutput = true; 
       }
 
    return (getStoreAddress()->checkAiadd(_outputNode, storeNode->getSize()));
