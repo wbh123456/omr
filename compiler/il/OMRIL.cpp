@@ -595,6 +595,7 @@ OMR::IL::opCodeForCorrespondingIndirectLoad(TR::ILOpCodes loadOpCode)
       case TR::dloadi: return TR::dstorei;
       case TR::aloadi: return TR::astorei;
       case TR::vloadi: return TR::vstorei;
+      case TR::cloadi: return TR::cstorei;
    
       case TR::brdbari:
       case TR::srdbari:
@@ -630,6 +631,7 @@ OMR::IL::opCodeForCorrespondingIndirectStore(TR::ILOpCodes storeOpCode)
       case TR::astorei:  return TR::aloadi;
       case TR::awrtbari: return TR::aloadi;
       case TR::vstorei:  return TR::vloadi;
+      case TR::cstorei:  return TR::cloadi;
       case TR::bwrtbari:
       case TR::swrtbari:
       case TR::iwrtbari:
