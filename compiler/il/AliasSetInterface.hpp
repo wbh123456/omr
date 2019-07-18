@@ -461,19 +461,11 @@ TR_BitVector *TR_SymAliasSetInterface<useDefAliasSet>::getTRAliases_impl(bool is
 template <> inline
 TR_BitVector *TR_SymAliasSetInterface<UseOnlyAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
    {
-   //if the class is called from node class
-   if(_from_node)
-      {
-      TR::Compilation *comp = TR::comp();
-      TR_BitVector *bv = NULL;
-
-      if (_node->getOpCode().isLikeUse() && _node->getOpCode().hasSymbolReference())
-         bv = _node->getSymbolReference()->getUseonlyAliasesBV(comp->getSymRefTab());
-      // else there is no symbol reference associated with the node, we return an empty bit container
-
-      return bv;
-      }
-   else  
+      if(!_symbolReference)
+         {
+         //if there is no symbol reference, then we return an empty bit container
+         return NULL;
+         } 
       return _symbolReference->getUseonlyAliasesBV(TR::comp()->getSymRefTab());
    }
 
@@ -505,6 +497,10 @@ void CountUseDefAliases( T& t, const TR::SparseBitVector &syms)
          }
       }
    }
+
+
+//////////////////////////////////////////////////
+
 
 
 inline TR_UseOnlyAliasSetInterface
