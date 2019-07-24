@@ -1284,7 +1284,6 @@ public:
          case TR::dstore:
             return TR::vstore;
          case TR::bstorei:
-         case TR::cstorei:
          case TR::sstorei:
          case TR::istorei:
          case TR::lstorei:
