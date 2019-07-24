@@ -187,11 +187,20 @@ OMR::Node::mayUse()
       }
    }
 
-TR_NodeKillAliasSetInterface
+TR_UseDefAliasSetInterface
 OMR::Node::mayKill(bool gcSafe)
    {
-   TR_NodeKillAliasSetInterface aliasSetInterface(self(), self()->getOpCode().isCallDirect(), gcSafe);
-   return aliasSetInterface;
+   if (self()->getOpCode().hasSymbolReference() && (self()->getOpCode().isLikeDef() || self()->mightHaveVolatileSymbolReference())) //we want the old behavior in these cases
+      {
+      TR_UseDefAliasSetInterface aliasSetInterface(self()->getSymbolReference(), self()->getOpCode().isCallDirect(), gcSafe);
+      return aliasSetInterface;
+      }
+   else
+      {
+      //if there is no symbolreference, then return an empty aliseset
+      TR_UseDefAliasSetInterface aliasSetInterface(NULL, self()->getOpCode().isCallDirect(), gcSafe);
+      return aliasSetInterface;
+      }
    }
 
 /**

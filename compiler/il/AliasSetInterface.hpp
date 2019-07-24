@@ -253,12 +253,12 @@ public:
     _node(NULL),
     _from_node(false) {}
 
-//initialize from node
-  TR_SymAliasSetInterface(TR::Node *node, bool isDirectCall = false, bool includeGCSafePoint = false) :
-   TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-      _symbolReference(NULL),
-      _node(node),
-      _from_node(true) {}
+   //initialize from node
+TR_SymAliasSetInterface(TR::Node *node, bool isDirectCall = false, bool includeGCSafePoint = false) :
+TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
+   _symbolReference(NULL),
+   _node(node),
+   _from_node(true) {}
 
    TR_BitVector *getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint);
 
@@ -434,28 +434,25 @@ void TR_SymAliasSetInterface<_aliasSetType>::setSymRef1KillsSymRef2Asymmetricall
 template <> inline
 TR_BitVector *TR_SymAliasSetInterface<useDefAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
    {
-   //if the class is called from node class
-   if(_from_node)
+   if(_symbolReference)
       {
-      TR::Compilation *comp = TR::comp();
-      TR_BitVector *bv = NULL;
+      if(_symbolReference->sharesSymbol(includeGCSafePoint))
+         return _symbolReference->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
 
-      if (_node->getOpCode().hasSymbolReference() && (_node->getOpCode().isLikeDef() || _node->mightHaveVolatileSymbolReference())) //we want the old behavior in these cases
+      else
          {
-         if (_node->getSymbolReference()->sharesSymbol(includeGCSafePoint))
-            bv = _node->getSymbolReference()->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
-         else
-            {
-            bv = new (comp->aliasRegion()) TR_BitVector(comp->getSymRefCount(), comp->aliasRegion(), growable);
-            bv->set(_node->getSymbolReference()->getReferenceNumber());
-            }
-         }
+         TR::Compilation *comp = TR::comp();
+         TR_BitVector *bv = NULL;
 
-      // else there is no symbol reference associated with the node, we return an empty bit container
-      return bv;
+         bv = new (comp->aliasRegion()) TR_BitVector(comp->getSymRefCount(), comp->aliasRegion(), growable);
+         bv->set(_symbolReference->getReferenceNumber());
+
+         return bv;
+         }
       }
-   else
-      return _symbolReference->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
+
+   // else there is no symbol reference associated with the node, we return an empty bit container
+   return NULL;
    }
 
 template <> inline
