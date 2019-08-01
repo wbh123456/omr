@@ -249,16 +249,8 @@ public:
 //initialize from symref directly (independent from node)
   TR_SymAliasSetInterface(TR::SymbolReference *symRef, bool isDirectCall = false, bool includeGCSafePoint = false) :
     TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-    _symbolReference(symRef),
-    _node(NULL),
-    _from_node(false) {}
+    _symbolReference(symRef) {}
 
-   //initialize from node
-TR_SymAliasSetInterface(TR::Node *node, bool isDirectCall = false, bool includeGCSafePoint = false) :
-TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-   _symbolReference(NULL),
-   _node(node),
-   _from_node(true) {}
 
    TR_BitVector *getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint);
 
@@ -299,10 +291,6 @@ private:
     static void setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value);
 
   TR::SymbolReference *_symbolReference;
-  ///the node which initializes this class(if the class is initialized through a node)
-  TR::Node *_node;
-  ///indicates if the class in initialized through a node.
-  bool _from_node;
 };
 
 struct TR_UseDefAliasSetInterface : public TR_SymAliasSetInterface<useDefAliasSet> {
@@ -319,23 +307,6 @@ struct TR_UseOnlyAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasS
                               bool includeGCSafePoint = false) :
   TR_SymAliasSetInterface<UseOnlyAliasSet>
     (symRef, isDirectCall, includeGCSafePoint) {}
-};
-
-//Alias interface initialized from Node
-struct TR_NodeUseAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasSet> {
-  TR_NodeUseAliasSetInterface(TR::Node *node,
-                              bool isDirectCall = false,
-                              bool includeGCSafePoint = false) :
-  TR_SymAliasSetInterface<UseOnlyAliasSet>
-    (node, isDirectCall, includeGCSafePoint) {}
-};
-
-struct TR_NodeKillAliasSetInterface: public TR_SymAliasSetInterface<useDefAliasSet> {
-  TR_NodeKillAliasSetInterface(TR::Node *node,
-                               bool isDirectCall = false,
-                               bool includeGCSafePoint = false) :
-    TR_SymAliasSetInterface<useDefAliasSet>
-     (node, isDirectCall, includeGCSafePoint) {}
 };
 
 template <uint32_t _aliasSetType> inline
