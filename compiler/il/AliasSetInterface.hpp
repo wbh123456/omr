@@ -246,11 +246,16 @@ typedef enum {
 template <uint32_t _aliasSetType>
 class TR_SymAliasSetInterface : public TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> > {
 public:
-//initialize from symref directly (independent from node)
+
   TR_SymAliasSetInterface(TR::SymbolReference *symRef, bool isDirectCall = false, bool includeGCSafePoint = false) :
     TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
-    _symbolReference(symRef) {}
+    _symbolReference(symRef),
+    _shares_symbol(true) {}
 
+  TR_SymAliasSetInterface(bool shares_symbol, TR::SymbolReference *symRef, bool isDirectCall = false, bool includeGCSafePoint = false) :
+    TR_AliasSetInterface<TR_SymAliasSetInterface<_aliasSetType> >(isDirectCall, includeGCSafePoint),
+    _symbolReference(symRef),
+    _shares_symbol(shares_symbol) {}
 
    TR_BitVector *getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint);
 
@@ -291,6 +296,8 @@ private:
     static void setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value);
 
   TR::SymbolReference *_symbolReference;
+  //this value could be false only when calling from Node::mayKill() function, which calls shareSymbol on the caller side
+  bool _shares_symbol;
 };
 
 struct TR_UseDefAliasSetInterface : public TR_SymAliasSetInterface<useDefAliasSet> {
@@ -299,6 +306,13 @@ struct TR_UseDefAliasSetInterface : public TR_SymAliasSetInterface<useDefAliasSe
                              bool includeGCSafePoint = false) :
   TR_SymAliasSetInterface<useDefAliasSet>
     (symRef, isDirectCall, includeGCSafePoint) {}
+
+  TR_UseDefAliasSetInterface(bool shares_symbol,
+                             TR::SymbolReference *symRef,
+                             bool isDirectCall = false,
+                             bool includeGCSafePoint = false) :
+  TR_SymAliasSetInterface<useDefAliasSet>
+    (shares_symbol, symRef, isDirectCall, includeGCSafePoint) {}
 };
 
 struct TR_UseOnlyAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasSet> {
@@ -407,7 +421,7 @@ TR_BitVector *TR_SymAliasSetInterface<useDefAliasSet>::getTRAliases_impl(bool is
    {
    if(_symbolReference)
       {
-      if(_symbolReference->sharesSymbol(includeGCSafePoint))
+      if(_shares_symbol)
          return _symbolReference->getUseDefAliasesBV(isDirectCall, includeGCSafePoint);
 
       else

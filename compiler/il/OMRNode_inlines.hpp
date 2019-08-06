@@ -192,7 +192,8 @@ OMR::Node::mayKill(bool gcSafe)
    {
    if (self()->getOpCode().hasSymbolReference() && (self()->getOpCode().isLikeDef() || self()->mightHaveVolatileSymbolReference())) //we want the old behavior in these cases
       {
-      TR_UseDefAliasSetInterface aliasSetInterface(self()->getSymbolReference(), self()->getOpCode().isCallDirect(), gcSafe);
+      bool shares_symbol = self()->getSymbolReference()->sharesSymbol(gcSafe);
+      TR_UseDefAliasSetInterface aliasSetInterface(shares_symbol, self()->getSymbolReference(), self()->getOpCode().isCallDirect(), gcSafe);
       return aliasSetInterface;
       }
    else
