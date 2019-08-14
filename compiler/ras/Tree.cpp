@@ -2421,6 +2421,12 @@ int32_t childTypes[] =
    TR::Int64,                     // TR::lxor
    TR::Int8,                      // TR::bxor
    TR::Int16,                     // TR::sxor
+
+   TR::Float,                     // TR::fmuladd
+   TR::Float,                     // TR::fmulsub
+   TR::Float,                     // TR::fnegmuladd
+   TR::Float,                     // TR::fnegmulsub
+
    TR::Int32,                     // TR::i2l
    TR::Int32,                     // TR::i2f
    TR::Int32,                     // TR::i2d

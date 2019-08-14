@@ -192,6 +192,11 @@
    TR::TreeEvaluator::ixorEvaluator,        // TR::bxor
    TR::TreeEvaluator::ixorEvaluator,        // TR::sxor
 
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fmulsub
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmulsub
+
    TR::TreeEvaluator::b2lEvaluator,         // TR::i2l
    TR::TreeEvaluator::i2fEvaluator,         // TR::i2f
    TR::TreeEvaluator::i2dEvaluator,         // TR::i2d

@@ -178,6 +178,11 @@
    TR::TreeEvaluator::bxorEvaluator,        // TR::bxor
    TR::TreeEvaluator::sxorEvaluator,        // TR::sxor
 
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fmulsub
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmulsub
+
 #define SIGNED true
 #define UNSIGN false
    TR::TreeEvaluator::extendCastEvaluator<SIGNED, 32, 64>,   // TR::i2l

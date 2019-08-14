@@ -174,6 +174,10 @@
     TR::TreeEvaluator::lxorEvaluator, // TR::lxor		// boolean xor of 2 long integers
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:ARM64: Enable when Implemented: TR::TreeEvaluator::bxorEvaluator ,	// TR::bxor		// boolean xor of 2 bytes
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:ARM64: Enable when Implemented: TR::TreeEvaluator::sxorEvaluator ,	// TR::sxor		// boolean xor of 2 short integers
+    TR::TreeEvaluator::unImpOpEvaluator,  // TR::fmuladd
+    TR::TreeEvaluator::unImpOpEvaluator,  // TR::fmulsub
+    TR::TreeEvaluator::unImpOpEvaluator,  // TR::fnegmuladd
+    TR::TreeEvaluator::unImpOpEvaluator,  // TR::fnegmulsub
     TR::TreeEvaluator::i2lEvaluator, // TR::i2l		// convert integer to long integer with sign extension
     TR::TreeEvaluator::i2fEvaluator, // TR::i2f		// convert integer to float
     TR::TreeEvaluator::i2dEvaluator, // TR::i2d		// convert integer to double

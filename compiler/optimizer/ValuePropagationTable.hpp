@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corp. and others
+ * Copyright (c) 2000, 2019 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -314,6 +314,11 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainLxor,            // TR::lxor
    constrainChildren,        // TR::bxor
    constrainChildren,        // TR::sxor
+
+   constrainChildren,        // TR::fmuladd
+   constrainChildren,        // TR::fmulsub
+   constrainChildren,        // TR::fnegmuladd
+   constrainChildren,        // TR::fnegmulsub
 
    constrainI2l,             // TR::i2l
    constrainChildren,        // TR::i2f

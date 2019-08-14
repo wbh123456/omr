@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corp. and others
+ * Copyright (c) 2000, 2019 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -212,6 +212,11 @@
    lxor,     // boolean xor of 2 long integers
    bxor,     // boolean xor of 2 bytes
    sxor,     // boolean xor of 2 short integers
+
+   fmuladd,  // float multiply add                       (a * b) + c
+   fmulsub,  // float multiply sub                       (a * b) - c
+   fnegmuladd,  // float negative multiply add           - (a * b) + c
+   fnegmulsub, // float negative multiply sub           - (a * b) - c
 
    i2l,      // convert integer to long integer with sign extension
    i2f,      // convert integer to float
