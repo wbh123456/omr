@@ -179,6 +179,10 @@
    dftSimplifier,           // TR::fmulsub
    dftSimplifier,           // TR::fnegmuladd
    dftSimplifier,           // TR::fnegmulsub
+   dftSimplifier,           // TR::dmuladd
+   dftSimplifier,           // TR::dmulsub
+   dftSimplifier,           // TR::dnegmuladd
+   dftSimplifier,           // TR::dnegmulsub
 
    i2lSimplifier,           // TR::i2l
    i2fSimplifier,           // TR::i2f

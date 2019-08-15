@@ -213,10 +213,14 @@
    bxor,     // boolean xor of 2 bytes
    sxor,     // boolean xor of 2 short integers
 
-   fmuladd,  // float multiply add                       (a * b) + c
-   fmulsub,  // float multiply sub                       (a * b) - c
+   fmuladd,     // float multiply add                       (a * b) + c
+   fmulsub,     // float multiply sub                       (a * b) - c
    fnegmuladd,  // float negative multiply add           - (a * b) + c
-   fnegmulsub, // float negative multiply sub           - (a * b) - c
+   fnegmulsub,  // float negative multiply sub            - (a * b) - c
+   dmuladd,     // double multiply add                   (a * b) + c
+   dmulsub,     // double multiply sub                   (a * b) - c
+   dnegmuladd,  // double negative multiply add          - (a * b) + c
+   dnegmulsub,  // double negative multiply sub          - (a * b) - c
 
    i2l,      // convert integer to long integer with sign extension
    i2f,      // convert integer to float

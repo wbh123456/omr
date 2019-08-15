@@ -182,6 +182,10 @@
    TR::TreeEvaluator::unImpOpEvaluator,     // TR::fmulsub
    TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmuladd
    TR::TreeEvaluator::unImpOpEvaluator,     // TR::fnegmulsub
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::dmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::dmulsub
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::dnegmuladd
+   TR::TreeEvaluator::unImpOpEvaluator,     // TR::dnegmulsub
 
 #define SIGNED true
 #define UNSIGN false
