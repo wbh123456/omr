@@ -771,6 +771,8 @@ TR::Register *TR_X86BinaryCommutativeAnalyser::integerAddAnalyserImpl(TR::Node  
    TR::Register *firstRegister  = firstChild->getRegister();
    TR::Register *secondRegister = secondChild->getRegister();
 
+   TR_ASSERT_FATAL(!firstRegister||!secondRegister, "ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! either first or second register is null in integerAddAnalyserimpl");
+
 
    setInputs(firstChild, firstRegister, secondChild, secondRegister);
 
