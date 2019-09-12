@@ -2075,8 +2075,8 @@ OMR::Node::isDualHigh()
       {
       TR::ILOpCodes pairOpValue = self()->getChild(2)->getOpCodeValue();
       if (((self()->getOpCodeValue() == TR::lumulh) && (pairOpValue == TR::lmul))
-          || ((self()->getOpCodeValue() == TR::luaddh) && (pairOpValue == TR::luadd))
-          || ((self()->getOpCodeValue() == TR::lusubh) && (pairOpValue == TR::lusub)))
+          || ((self()->getOpCodeValue() == TR::luaddh) && (pairOpValue == TR::ladd))
+          || ((self()->getOpCodeValue() == TR::lusubh) && (pairOpValue == TR::lsub)))
          return true;
       }
    return false;
@@ -2107,8 +2107,8 @@ OMR::Node::isTernaryHigh()
       TR::ILOpCodes ccOpValue = self()->getChild(2)->getOpCodeValue();
       TR::ILOpCodes pairOpValue = self()->getChild(2)->getFirstChild()->getOpCodeValue();
       if ((ccOpValue == TR::computeCC) &&
-          (((self()->getOpCodeValue() == TR::luaddc) && (pairOpValue == TR::luadd))
-           || ((self()->getOpCodeValue() == TR::lusubb) && (pairOpValue == TR::lusub))))
+          (((self()->getOpCodeValue() == TR::luaddc) && (pairOpValue == TR::ladd))
+           || ((self()->getOpCodeValue() == TR::lusubb) && (pairOpValue == TR::lsub))))
          return true;
       }
    return false;
