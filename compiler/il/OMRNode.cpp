@@ -8155,13 +8155,13 @@ OMR::Node::printCanSkipZeroInitialization()
 bool
 OMR::Node::isAdjunct()
    {
-   return (self()->getOpCodeValue() == TR::lmul || self()->getOpCodeValue() == TR::luadd || self()->getOpCodeValue() == TR::lusub) && _flags.testAny(adjunct);
+   return (self()->getOpCodeValue() == TR::lmul || self()->getOpCodeValue() == TR::ladd || self()->getOpCodeValue() == TR::lsub) && _flags.testAny(adjunct);
    }
 
 void
 OMR::Node::setIsAdjunct(bool v)
    {
-   TR_ASSERT(self()->getOpCodeValue() == TR::lmul || self()->getOpCodeValue() == TR::luadd || self()->getOpCodeValue() == TR::lusub, "Opcode must be lmul, lusub, or luadd");
+   TR_ASSERT(self()->getOpCodeValue() == TR::lmul || self()->getOpCodeValue() == TR::ladd || self()->getOpCodeValue() == TR::lsub, "Opcode must be lmul, lusub, or luadd");
    _flags.set(adjunct, v);
    }
 
