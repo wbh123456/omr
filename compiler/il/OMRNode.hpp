@@ -373,6 +373,21 @@ private:
       TR_ASSERT(opvalue != TR::vconst, "use createVectorConst to create node: %s", opcode.getName());
       return true;
       }
+   
+   static bool isNotDeprecatedUnsigned(TR::ILOpCodes opvalue)
+      {
+      int listSize = 20;
+      TR::ILOpCodes DeprecatedUnsignedList [] = 
+         {
+         TR::bucmpeq, TR::bucmpne, TR::iucmpeq ,TR::iucmpne ,TR::lucmpeq ,TR::lucmpne ,TR::sucmpeq ,TR::sucmpne, //Equality compare
+         TR::ifiucmpeq, TR::ifiucmpne, TR::iflucmpeq, TR::iflucmpne, TR::ifbucmpeq, TR::ifbucmpne, TR::ifsucmpeq, TR::ifsucmpne, //Equality compare and branch
+         TR::buconst, TR::iuconst, TR::luconst, TR::cconst //Constant
+         };
+      for(int i = 0; i != listSize; i++)
+            if(opvalue == DeprecatedUnsignedList[i])
+               return false;
+      return true;
+      }
 
 
 /**
