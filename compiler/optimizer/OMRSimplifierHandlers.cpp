@@ -1653,7 +1653,7 @@ static bool reduceLongOp(TR::Node * node, TR::Block * block, TR::Simplifier * s,
                // shift by > 31 bits gets constant 0
                if (newConversionOp == TR::BadILOp)
                   {
-                  TR::Node::recreate(node, isUnsigned ? TR::iuconst : TR::iconst);
+                  TR::Node::recreate(node, TR::iconst);
                   firstChild->recursivelyDecReferenceCount();
                   node->setNumChildren(0);
                   node->setChild(0, 0);
@@ -1661,7 +1661,7 @@ static bool reduceLongOp(TR::Node * node, TR::Block * block, TR::Simplifier * s,
                   }
                else
                   {
-                  TR::Node::recreate(firstChild, isUnsigned ? TR::iuconst : TR::iconst);
+                  TR::Node::recreate(firstChild,TR::iconst);
                   firstChild->getFirstChild()->recursivelyDecReferenceCount();
                   firstChild->getSecondChild()->recursivelyDecReferenceCount();
                   firstChild->setInt(0);
@@ -2370,7 +2370,7 @@ static void longCompareNarrower(TR::Node * node, TR::Simplifier * s, TR::ILOpCod
                   {
                   if (secondChild->getReferenceCount()==1)
                      {
-                     TR::Node::recreate(secondChild, TR::cconst);
+                     TR::Node::recreate(secondChild, TR::sconst);
                      secondChild->setConst<uint16_t>((uint16_t)secondChild->getLongInt());
                      secondChild->notifyChangeToValueOfNode();
                      }
@@ -4202,13 +4202,13 @@ static void intCompareNarrower(TR::Node * node, TR::Simplifier * s, TR::ILOpCode
                {
                if (secondChild->getReferenceCount() > 1)
                   {
-                  TR::Node * newSecondChild = TR::Node::cconst(secondChild, (uint16_t)secondChild->getInt());
+                  TR::Node * newSecondChild = TR::Node::sconst(secondChild, (uint16_t)secondChild->getInt());
                   secondChild->recursivelyDecReferenceCount();
                   node->setAndIncChild(1, newSecondChild);
                   }
                else
                   {
-                  TR::Node::recreate(secondChild, TR::cconst);
+                  TR::Node::recreate(secondChild, TR::sconst);
                   secondChild->setConst<uint16_t>((uint16_t)secondChild->getInt());
                   }
                if (reportCompareDemotions)
@@ -4245,7 +4245,7 @@ static void intCompareNarrower(TR::Node * node, TR::Simplifier * s, TR::ILOpCode
                {
                if (secondChild->getReferenceCount() > 1)
                   {
-                  TR::Node * newSecondChild = TR::Node::sconst(secondChild, (int16_t)secondChild->getInt());
+                  TR::Node * newSecondChild = TR::Node::cconst(secondChild, (int16_t)secondChild->getInt());
                   newSecondChild->setShortInt((int16_t)secondChild->getInt());
                   secondChild->recursivelyDecReferenceCount();
                   node->setAndIncChild(1, newSecondChild);
@@ -4350,7 +4350,7 @@ static void unsignedIntCompareNarrower(TR::Node * node, TR::Simplifier * s, TR::
                   }
                else
                   {
-                  TR::Node::recreate(secondChild, TR::cconst);
+                  TR::Node::recreate(secondChild, TR::sconst);
                   secondChild->setConst<uint16_t>((uint16_t)secondChild->getUnsignedInt());
                   }
                if (reportCompareDemotions)
@@ -15757,7 +15757,7 @@ static void foldUnsignedLongIntConstant(TR::Node * node, uint64_t value, TR::Sim
 
    if (anchorChildrenP) s->anchorChildren(node, s->_curTree);
 
-   s->prepareToReplaceNode(node, TR::luconst);
+   s->prepareToReplaceNode(node, TR::lconst);
    node->setUnsignedLongInt(value);
    setIsHighWordZero(node, s);
 
@@ -15854,7 +15854,7 @@ static void foldUByteConstant(TR::Node * node, uint8_t value, TR::Simplifier * s
 
    if (anchorChildrenP) s->anchorChildren(node, s->_curTree);
 
-   s->prepareToReplaceNode(node, TR::buconst);
+   s->prepareToReplaceNode(node, TR::bconst);
    node->setUnsignedByte(value);
    dumpOptDetails(s->comp(), " to %s %d\n", node->getOpCode().getName(), node->getUnsignedByte());
    }
@@ -15865,7 +15865,7 @@ static void foldCharConstant(TR::Node * node, uint16_t value, TR::Simplifier * s
 
    if (anchorChildrenP) s->anchorChildren(node, s->_curTree);
 
-   s->prepareToReplaceNode(node, TR::cconst);
+   s->prepareToReplaceNode(node, TR::sconst);
    node->setConst<uint16_t>(value);
    dumpOptDetails(s->comp(), " to %s %d\n", node->getOpCode().getName(), node->getConst<uint16_t>());
    }
@@ -16042,7 +16042,7 @@ TR::Node * imulhSimplifier(TR::Node * node, TR::Block *block, TR::Simplifier * s
             uint64_t product = src1 * src2;
             uint64_t high = product >> 32;
             uint32_t result = high;
-            TR::Node::recreate(node, TR::iuconst);
+            TR::Node::recreate(node, TR::iconst);
             node->setUnsignedInt(result);
             }
          else
