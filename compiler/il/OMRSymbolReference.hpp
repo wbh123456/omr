@@ -56,7 +56,7 @@ namespace TR { class ResolvedMethodSymbol; }
 namespace TR { class SymbolReference; }
 template <class T> class TR_Array;
 template <uint32_t> class TR_NodeAliasSetInterface;
-template <uint32_t> class TR_SymAliasSetInterface;
+template <uint32_t> class TR_AliasSetInterface;
 typedef TR::SparseBitVector SharedSparseBitVector;
 
 // Extra symbol reference info for allocation nodes.
@@ -314,7 +314,7 @@ protected:
    friend class ::TR_NodeAliasSetInterface;
 
    template <uint32_t>
-   friend class ::TR_SymAliasSetInterface;
+   friend class ::TR_AliasSetInterface;
 
    TR_BitVector *getUseonlyAliasesBV(TR::SymbolReferenceTable *symRefTab);
    TR_BitVector *getUseDefAliasesBV( bool isDirectCall = false, bool gcSafe = false);
