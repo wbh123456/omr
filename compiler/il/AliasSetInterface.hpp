@@ -240,6 +240,7 @@ public:
 private:
    static void removeSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint);
    static void addSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint);
+   static void setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value);
    //------------------------------------------------
 };
 
@@ -296,9 +297,6 @@ public:
       }
 
 private:
-
-    static void setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value);
-
   TR::SymbolReference *_symbolReference;
   
   //shows if the _symbolReference can have alias. Could only be false when called from Node::mayKill() function
@@ -355,6 +353,19 @@ void TR_AliasSetInterface<AliasSetInterface>::addSymRef1KillsSymRef2Asymmetrical
          symRef2_useAliases->set(symRef1->getReferenceNumber());
       }
    }
+
+template <class AliasSetInterface> inline
+void TR_AliasSetInterface<class AliasSetInterface>::setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value)
+   {
+   TR::Compilation *comp = TR::comp();
+   if ((symRef1 == NULL) || (symRef2 == NULL))
+      return;
+
+   if (value)
+      addSymRef1KillsSymRef2Asymmetrically(symRef1, symRef2, includeGCSafePoint);
+   else
+      removeSymRef1KillsSymRef2Asymmetrically(symRef1, symRef2, includeGCSafePoint);
+   }
 //----------------------------------------------------------------------
 
 struct TR_UseOnlyAliasSetInterface: public TR_SymAliasSetInterface<UseOnlyAliasSet> {
@@ -410,19 +421,6 @@ void TR_SymAliasSetInterface<_aliasSetType>::setAlias_impl(TR::SymbolReference *
    }
 
 
-
-template <uint32_t _aliasSetType> inline
-void TR_SymAliasSetInterface<_aliasSetType>::setSymRef1KillsSymRef2Asymmetrically(TR::SymbolReference *symRef1, TR::SymbolReference *symRef2, bool includeGCSafePoint, bool value)
-   {
-   TR::Compilation *comp = TR::comp();
-   if ((symRef1 == NULL) || (symRef2 == NULL))
-      return;
-
-   if (value)
-      addSymRef1KillsSymRef2Asymmetrically(symRef1, symRef2, includeGCSafePoint);
-   else
-      removeSymRef1KillsSymRef2Asymmetrically(symRef1, symRef2, includeGCSafePoint);
-   }
 
 template <> inline
 TR_BitVector *TR_SymAliasSetInterface<useDefAliasSet>::getTRAliases_impl(bool isDirectCall, bool includeGCSafePoint)
