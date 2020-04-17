@@ -68,6 +68,8 @@ TR::VPIntRange          *TR::VPConstraint::asIntRange()          { return NULL; 
 TR::VPLongConstraint    *TR::VPConstraint::asLongConstraint()    { return NULL; }
 TR::VPLongConst         *TR::VPConstraint::asLongConst()         { return NULL; }
 TR::VPLongRange         *TR::VPConstraint::asLongRange()         { return NULL; }
+TR::VPFloatConstraint   *TR::VPConstraint::asFloatConstraint()   { return NULL; }
+TR::VPDoubleConstraint  *TR::VPConstraint::asDoubleConstraint()  { return NULL; }
 TR::VP_BCDValue         *TR::VPConstraint::asBCDValue()          { return NULL; }
 TR::VP_BCDSign          *TR::VPConstraint::asBCDSign()           { return NULL; }
 TR::VPClass             *TR::VPConstraint::asClass()             { return NULL; }
@@ -87,6 +89,8 @@ TR::VPMergedConstraints *TR::VPConstraint::asMergedConstraints() { return NULL; 
 TR::VPMergedConstraints *TR::VPConstraint::asMergedShortConstraints() {return NULL;}
 TR::VPMergedConstraints *TR::VPConstraint::asMergedIntConstraints() { return NULL; }
 TR::VPMergedConstraints *TR::VPConstraint::asMergedLongConstraints(){ return NULL; }
+TR::VPMergedConstraints *TR::VPConstraint::asMergedFloatConstraints() { return NULL; }
+TR::VPMergedConstraints *TR::VPConstraint::asMergedDoubleConstraints() { return NULL; }
 TR::VPUnreachablePath   *TR::VPConstraint::asUnreachablePath()   { return NULL; }
 TR::VPSync              *TR::VPConstraint::asVPSync()            { return NULL; }
 TR::VPRelation          *TR::VPConstraint::asRelation()          { return NULL; }
@@ -103,6 +107,8 @@ TR::VPIntRange          *TR::VPIntRange::asIntRange()                   { return
 TR::VPLongConstraint    *TR::VPLongConstraint::asLongConstraint()       { return this; }
 TR::VPLongConst         *TR::VPLongConst::asLongConst()                 { return this; }
 TR::VPLongRange         *TR::VPLongRange::asLongRange()                 { return this; }
+TR::VPFloatConstraint   *TR::VPFloatConstraint::asFloatConstraint()     { return this; }
+TR::VPDoubleConstraint  *TR::VPDoubleConstraint::asDoubleConstraint()   { return this; }
 TR::VPClass             *TR::VPClass::asClass()                         { return this; }
 TR::VPClassType         *TR::VPClassType::asClassType()                 { return this; }
 TR::VPResolvedClass     *TR::VPResolvedClass::asResolvedClass()         { return this; }
@@ -120,6 +126,8 @@ TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedConstraints() { return
 TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedShortConstraints() { return (_type.isInt16()) ? this : NULL; }
 TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedIntConstraints() { return (_type.isInt32()) ? this : NULL; }
 TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedLongConstraints() { return (_type.isInt64()) ? this : NULL; }
+TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedFloatConstraints() { return (_type.getDataType() == TR::Float) ? this : NULL; }
+TR::VPMergedConstraints *TR::VPMergedConstraints::asMergedDoubleConstraints() { return (_type.getDataType() == TR::Double) ? this : NULL; }
 TR::VPUnreachablePath   *TR::VPUnreachablePath::asUnreachablePath()     { return this; }
 TR::VPSync              *TR::VPSync::asVPSync()                         { return this; }
 TR::VPRelation          *TR::VPRelation::asRelation()                   { return this; }
@@ -127,6 +135,21 @@ TR::VPLessThanOrEqual   *TR::VPLessThanOrEqual::asLessThanOrEqual()     { return
 TR::VPGreaterThanOrEqual*TR::VPGreaterThanOrEqual::asGreaterThanOrEqual(){ return this; }
 TR::VPEqual             *TR::VPEqual::asEqual()                         { return this; }
 TR::VPNotEqual          *TR::VPNotEqual::asNotEqual()                   { return this; }
+
+/* Helper functions for comparing floating point types
+ * Return 1 if lhs is greater than rhs; 
+ *       -1 if lhs is smaller than rhs;
+ *        0 if lhs is equal to rhs
+ */
+int32_t FPCompare(float lhs, float rhs)
+   {
+   return TR::Compiler->arith.floatComparefloat(lhs, rhs);
+   }
+
+int32_t FPCompare(double lhs, double rhs)
+   {
+   return TR::Compiler->arith.doubleComparedouble(lhs, rhs);
+   }
 
 int16_t TR::VPConstraint::getLowShort()
    {
@@ -166,6 +189,25 @@ int64_t TR::VPConstraint::getHighLong()
    return TR::getMaxSigned<TR::Int64>();
    }
 
+float TR::VPConstraint::getLowFloat()
+   {
+   return TR::getMinFloat();
+   }
+
+float TR::VPConstraint::getHighFloat()
+   {
+   return TR::getMaxFloat();
+   }
+
+double TR::VPConstraint::getLowDouble()
+   {
+   return TR::getMinDouble();
+   }
+
+double TR::VPConstraint::getHighDouble()
+   {
+   return TR::getMaxDouble();
+   }
 
 uint16_t TR::VPConstraint::getUnsignedLowShort()
    {
@@ -244,6 +286,70 @@ bool TR::VPConstraint::isFixedClass()
 bool TR::VPConstraint::isConstString()
    {
    return false;
+   }
+
+float TR::VPConstraint::fpAddWithOverflow(float a, float b, bool& overflow)
+   {
+   float sum = TR::Compiler->arith.floatAddFloat(a, b);
+
+   //The overflow flag is set when the arithmetic sum is greater the max/smaller than the min possible float value 
+   //the compiler can represent. This happends only when both of the two operands have the same sign bit. Therefore, 
+   //we check if the operation yields to an overflow by first comparing the signbits of the two floating points. 
+   if ((FPCompare(a, 0.0f) == 1) == (FPCompare(b, 0.0f) == 1))
+      {
+      //Then instead of directly adding the two operands(, which might cause undefined behavior), we check if
+      //the second operand is greater than the max value/smaller than the min value the first operand can be added to
+      //without an overflow.
+      float float_max = TR::getMaxFloat();
+      float float_min = TR::getMinFloat();
+      if (FPCompare(a, 0.0f) == 1)
+         overflow = FPCompare(b, TR::Compiler->arith.floatSubtractFloat(float_max, a)) == 1;
+         
+      else
+         overflow = FPCompare(b, TR::Compiler->arith.floatSubtractFloat(float_min, a)) == -1;
+      }
+   else 
+      overflow = false;
+
+   return sum;
+   }
+
+float TR::VPConstraint::fpSubWithOverflow(float a, float b, bool& overflow)
+   {
+   float diff = fpAddWithOverflow(a, TR::Compiler->arith.floatNegate(b), overflow);
+   return diff;
+   }
+
+double TR::VPConstraint::fpAddWithOverflow(double a, double b, bool& overflow)
+   {
+   double sum =FPCompare(a, b);
+
+   //The overflow flag is set when the arithmetic sum is greater the max/smaller than the min possible double value 
+   //the compiler can represent. This happends only when both of the two operands have the same sign bit. Therefore, 
+   //we check if the operation yields to an overflow by first comparing the signbits of the two floating points. 
+   if ((FPCompare(a, 0.0) == 1) == (FPCompare(b, 0.0) == 1))
+      {
+      //Then instead of directly adding the two operands(, which might cause undefined behavior), we check if
+      //the second operand is greater than the max value/smaller than the min value the first operand can be added to
+      //without an overflow.
+      double double_max = TR::getMaxFloat();
+      double double_min = TR::getMinFloat();
+      if (FPCompare(a, 0.0) == 1)
+         overflow = FPCompare(b, TR::Compiler->arith.doubleSubtractDouble(double_max, a)) == 1;
+         
+      else
+         overflow = FPCompare(b, TR::Compiler->arith.doubleSubtractDouble(double_min, a)) == -1;
+      }
+   else 
+      overflow = false;
+
+   return sum;
+   }
+
+double TR::VPConstraint::fpSubWithOverflow(double a, double b, bool& overflow)
+   {
+   double diff = fpAddWithOverflow(a, TR::Compiler->arith.doubleNegate(b), overflow);
+   return diff;
    }
 
 // VP_SPECIALKLASS is created so that any type that
@@ -358,6 +464,26 @@ int64_t TR::VPLongConstraint::getHighLong()
    return getHigh();
    }
 
+float TR::VPFloatConstraint::getLowFloat()
+   {
+   return getLow();
+   }
+
+float TR::VPFloatConstraint::getHighFloat()
+   {
+   return getHigh();
+   }
+
+double TR::VPDoubleConstraint::getLowDouble()
+   {
+   return getLow();
+   }
+
+double TR::VPDoubleConstraint::getHighDouble()
+   {
+   return getHigh();
+   }
+
 int16_t TR::VPMergedConstraints::getLowShort()
    {
    return _constraints.getListHead()->getData()->getLowShort();
@@ -386,6 +512,26 @@ int64_t TR::VPMergedConstraints::getLowLong()
 int64_t TR::VPMergedConstraints::getHighLong()
    {
    return _constraints.getLastElement()->getData()->getHighLong();
+   }
+
+float TR::VPMergedConstraints::getLowFloat()
+   {
+   return _constraints.getListHead()->getData()->getLowFloat();
+   }
+
+float TR::VPMergedConstraints::getHighFloat()
+   {
+   return _constraints.getLastElement()->getData()->getHighFloat();
+   }
+
+double TR::VPMergedConstraints::getLowDouble()
+   {
+   return _constraints.getListHead()->getData()->getLowDouble();
+   }
+
+double TR::VPMergedConstraints::getHighDouble()
+   {
+   return _constraints.getLastElement()->getData()->getHighDouble();
    }
 
 uint16_t TR::VPMergedConstraints::getUnsignedLowShort()
@@ -1858,6 +2004,64 @@ TR::VPConstraint *TR::VPLongConstraint::merge1(TR::VPConstraint *other, OMR::Val
    return NULL;
    }
 
+
+/* Take the union of `this` and `other` constraints
+ * If one contains the other, return the larger one
+ * If they are mutually inclusive, return a new Constraint of their union 
+ * If they are mutually exclusive, return a MergedConstraint of their union
+ */
+TR::VPConstraint *TR::VPFloatConstraint::merge1(TR::VPConstraint * other, OMR::ValuePropagation * vp)
+   {
+   TRACER(vp, this, other);
+
+     TR::VPFloatConstraint *otherFloat = other->asFloatConstraint();
+     if (otherFloat)
+        {
+        if (FPCompare(otherFloat->getLow(), getLow()) == -1)
+            return otherFloat->merge1(this,vp);
+        if (FPCompare(otherFloat->getHigh(), getHigh()) == 1)
+            return this;
+        if (FPCompare(otherFloat->getLow(), getHigh()) == -1)
+           {
+           if (FPCompare(getLow(), TR::getMinFloat()) == 0 && 
+               FPCompare(otherFloat->getHigh(), TR::getMaxFloat()) == 0)
+               return NULL;
+           return TR::VPFloatRange::create(vp, getLow(),otherFloat->getHigh());
+           }
+         return TR::VPMergedConstraints::create(vp, this, other);
+        }
+     return NULL;
+   }
+
+
+/* Take the union of `this` and `other` constraints
+ * If one contains the other, return the larger one
+ * If they are mutually inclusive, return a new Constraint of their union 
+ * If they are mutually exclusive, return a MergedConstraint of their union
+ */
+TR::VPConstraint *TR::VPDoubleConstraint::merge1(TR::VPConstraint * other, OMR::ValuePropagation * vp)
+   {
+   TRACER(vp, this, other);
+
+     TR::VPDoubleConstraint *otherDouble = other->asDoubleConstraint();
+     if (otherDouble)
+        {
+        if (FPCompare(otherDouble->getLow(), getLow()) == -1)
+            return otherDouble->merge1(this,vp);
+        if (FPCompare(otherDouble->getHigh(), getHigh()) == 1)
+            return this;
+        if (FPCompare(otherDouble->getLow(), getHigh()) == -1)
+           {
+           if (FPCompare(getLow(), TR::getMinDouble()) == 0 && 
+               FPCompare(otherDouble->getHigh(), TR::getMaxDouble()) == 0)
+               return NULL;
+           return TR::VPDoubleRange::create(vp, getLow(),otherDouble->getHigh());
+           }
+         return TR::VPMergedConstraints::create(vp, this, other);
+        }
+     return NULL;
+   }
+
 TR::VPConstraint *TR::VPClass::merge1(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
    TRACER(vp, this, other);
@@ -2896,6 +3100,54 @@ TR::VPConstraint *TR::VPLongConstraint::intersect1(TR::VPConstraint *other, OMR:
             }
          return NULL;
          }
+      }
+   return NULL;
+   }
+
+
+/* Take the intersect of `this` and `other` constraints
+ * If one contains the other, return the smaller one
+ * If they are mutually inclusive, return a new Constraint of their intersection 
+ * If they are mutually exclusive, return NULL
+ */
+TR::VPConstraint *TR::VPFloatConstraint::intersect1(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TRACER(vp, this, other);
+
+   TR::VPFloatConstraint *otherFloat = other->asFloatConstraint();
+   if (otherFloat)
+      {
+      if (FPCompare(otherFloat->getLow(), getLow()) == -1)
+         return otherFloat->intersect(this, vp);
+      if (FPCompare(otherFloat->getHigh(), getHigh()) == -1)
+         return other;
+      if (FPCompare(otherFloat->getLow(), getHigh()) == -1)
+         return TR::VPFloatRange::create(vp, otherFloat->getLow(), getHigh());
+      return NULL;
+      }
+   return NULL;
+   }
+
+
+/* Take the intersect of `this` and `other` constraints
+ * If one contains the other, return the smaller one
+ * If they are mutually inclusive, return a new Constraint of their intersection 
+ * If they are mutually exclusive, return NULL
+ */
+TR::VPConstraint *TR::VPDoubleConstraint::intersect1(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TRACER(vp, this, other);
+
+   TR::VPDoubleConstraint *otherDouble = other->asDoubleConstraint();
+   if (otherDouble)
+      {
+      if (FPCompare(otherDouble->getLow(), getLow()) == -1)
+         return otherDouble->intersect(this, vp);
+      if (FPCompare(otherDouble->getHigh(), getHigh()) == -1)
+         return other;
+      if (FPCompare(otherDouble->getLow(), getHigh()) == -1)
+         return TR::VPDoubleRange::create(vp, otherDouble->getLow(), getHigh());
+      return NULL;
       }
    return NULL;
    }
@@ -4514,6 +4766,52 @@ TR::VPConstraint *TR::VPIntConstraint::add(TR::VPConstraint *other, TR::DataType
    return getRange(low, high, lowOverflow, highOverflow, vp);
    }
 
+TR::VPConstraint *TR::VPFloatConstraint::add(TR::VPConstraint *other, TR::DataType dt, OMR::ValuePropagation *vp)
+   {
+    TR::VPFloatConstraint *otherFloat = other->asFloatConstraint();
+    if(!otherFloat)
+        return NULL;
+
+    TR::DataType type(dt);
+
+    if(!type.isFloat())
+        return NULL;
+
+   /*Compute the lower and upper bound values, and determine whether or not the arithmetic
+    *has overflowed in either case.
+    */
+   bool lowOverflow;
+   float low  = fpAddWithOverflow(getLow(), otherFloat->getLow(), lowOverflow);
+
+   bool highOverflow;
+   float high = fpAddWithOverflow(getHigh(), otherFloat->getHigh(), highOverflow);
+
+   return getRange(low, high, lowOverflow, highOverflow, vp);
+   }
+
+TR::VPConstraint *TR::VPDoubleConstraint::add(TR::VPConstraint *other, TR::DataType dt, OMR::ValuePropagation *vp)
+   {
+    TR::VPDoubleConstraint *otherDouble = other->asDoubleConstraint();
+    if(!otherDouble)
+        return NULL;
+
+    TR::DataType type(dt);
+
+    if(!type.isDouble())
+        return NULL;
+
+   /*Compute the lower and upper bound values, and determine whether or not the arithmetic
+    *has overflowed in either case.
+    */
+   bool lowOverflow;
+   double low  = fpAddWithOverflow(getLow(), otherDouble->getLow(), lowOverflow);
+
+   bool highOverflow;
+   double high = fpAddWithOverflow(getHigh(), otherDouble->getHigh(), highOverflow);
+
+   return getRange(low, high, lowOverflow, highOverflow, vp);
+   }
+
 // // unsigned subtract operation
 // TR::VPConstraint *TR::VPIntConstraint::subtract(TR::VPIntConstraint *otherInt, OMR::ValuePropagation *vp, bool Unsigned)
 //    {
@@ -4619,6 +4917,53 @@ TR::VPConstraint *TR::VPIntConstraint::subtract(TR::VPConstraint *other, TR::Dat
    return getRange(low, high, lowOverflow, highOverflow, vp);
    }
 
+
+TR::VPConstraint *TR::VPFloatConstraint::subtract(TR::VPConstraint *other, TR::DataType dt, OMR::ValuePropagation *vp)
+   {
+   TR::VPFloatConstraint *otherFloat = other->asFloatConstraint();
+   if (!otherFloat)
+      return NULL;
+
+   TR::DataType type(dt);
+   if (!type.isFloat())
+      return NULL;
+
+   /*Compute the lower and upper bound values, and determine whether or not the arithmetic
+    *has overflowed in either case.
+    */
+   bool lowOverflow;
+   float low  = fpSubWithOverflow(getLow(), otherFloat->getHigh(), lowOverflow);
+
+   bool highOverflow;
+   float high = fpSubWithOverflow(getHigh(), otherFloat->getLow(), highOverflow);
+
+   return getRange(low, high, lowOverflow, highOverflow, vp);
+   }
+
+
+TR::VPConstraint *TR::VPDoubleConstraint::subtract(TR::VPConstraint *other, TR::DataType dt, OMR::ValuePropagation *vp)
+   {
+   TR::VPDoubleConstraint *otherDouble = other->asDoubleConstraint();
+   if (!otherDouble)
+      return NULL;
+
+   TR::DataType type(dt);
+   if (!type.isDouble())
+      return NULL;
+
+   /*Compute the lower and upper bound values, and determine whether or not the arithmetic
+    *has overflowed in either case.
+    */
+   bool lowOverflow;
+   double low  = fpSubWithOverflow(getLow(), otherDouble->getHigh(), lowOverflow);
+
+   bool highOverflow;
+   double high = fpSubWithOverflow(getHigh(), otherDouble->getLow(), highOverflow);
+
+   return getRange(low, high, lowOverflow, highOverflow, vp);
+   }
+
+
 TR::VPConstraint *TR::VPShortConstraint::getRange(int16_t low, int16_t high, bool lowCanOverflow, bool highCanOverflow, OMR::ValuePropagation * vp)
    {
    //This function returns a VP constraint range, with the appropriate setting of the canOverflow bit, for either an addition or subtraction
@@ -4626,7 +4971,7 @@ TR::VPConstraint *TR::VPShortConstraint::getRange(int16_t low, int16_t high, boo
    //arithmetic as that of the underlying operation, along with two flags indicated whether or not the operations producing these two bounds
    //overflowed. From these values, a constraint can be created, with the overflow flags being set as conservatively as possible.
    //
-   //Also see VPIntConstraint::getRange and VPLongConstraint::getRange
+   //Also see VPIntConstraint::getRange, VPLongConstraint::getRange, VPFloatConstraint::getRange and VPDoubleConstraint::getRange
 
    if ( lowCanOverflow && highCanOverflow )
       {//Both sides overflow
@@ -4664,7 +5009,7 @@ TR::VPConstraint *TR::VPIntConstraint::getRange(int32_t low, int32_t high, bool 
    //arithmetic as that of the underlying operation, along with two flags indicated whether or not the operations producing these two bounds
    //overflowed. From these values, a constraint can be created, with the overflow flags being set as conservatively as possible.
    //
-   //Also see VPShortConstraint::getRange and VPLongConstraint::getRange
+   //Also see VPShortConstraint::getRange, VPLongConstraint::getRange, VPFloatConstraint::getRange and VPDoubleConstraint::getRange
 
    if ( lowCanOverflow && highCanOverflow )
       {//Both sides overflow
@@ -4694,6 +5039,47 @@ TR::VPConstraint *TR::VPIntConstraint::getRange(int32_t low, int32_t high, bool 
    //no overflow
    return TR::VPIntRange::create(vp, low, high, TR_no);
    }
+
+
+TR::VPConstraint *TR::VPFloatConstraint::getRange(float low, float high, bool lowCanOverflow, bool highCanOverflow, OMR::ValuePropagation *vp)
+   {
+   //This function returns a VP constraint range, with the appropriate setting of the canOverflow bit, for either an addition or subtraction
+   //operation. The function takes the results of the lower- and upper-bound calculations for the operation, both performed in the same precision
+   //arithmetic as that of the underlying operation, along with two flags indicated whether or not the operations producing these two bounds
+   //overflowed. From these values, a constraint can be created, with the overflow flags being set as conservatively as possible.
+   //
+   //Also see VPShortConstraint::getRange, VPIntConstraint::getRange, VPLongConstraint::getRange and VPDoubleConstraint::getRange
+
+   if ( lowCanOverflow || highCanOverflow )
+      /*If either side overflows, we return a NULL constraint for floating point.
+      *TO-DO implement correct handler for floating point overflow after arithmatic operation
+      */
+      return NULL;
+
+   //no overflow
+   return TR::VPFloatRange::create(vp, low, high, TR_no);
+   }
+
+
+TR::VPConstraint *TR::VPDoubleConstraint::getRange(double low, double high, bool lowCanOverflow, bool highCanOverflow, OMR::ValuePropagation *vp)
+   {
+   //This function returns a VP constraint range, with the appropriate setting of the canOverflow bit, for either an addition or subtraction
+   //operation. The function takes the results of the lower- and upper-bound calculations for the operation, both performed in the same precision
+   //arithmetic as that of the underlying operation, along with two flags indicated whether or not the operations producing these two bounds
+   //overflowed. From these values, a constraint can be created, with the overflow flags being set as conservatively as possible.
+   //
+   //Also see VPShortConstraint::getRange, VPIntConstraint::getRange, VPLongConstraint::getRange and VPDoubleConstraint::getRange
+
+   if ( lowCanOverflow || highCanOverflow )
+      /*If either side overflows, we return a NULL constraint for floating point.
+      *TO-DO implement correct handler for floating point overflow after arithmatic operation
+      */
+      return NULL;
+
+   //no overflow
+   return TR::VPDoubleRange::create(vp, low, high, TR_no);
+   }
+
 
 TR::VPConstraint *TR::VPLongConstraint::add(TR::VPConstraint *other, TR::DataType dt, OMR::ValuePropagation *vp)
    {
@@ -4972,6 +5358,53 @@ bool TR::VPLongConstraint::mustBeNotEqual(TR::VPConstraint *other, OMR::ValuePro
    return false;
    }
 
+
+/* Check if `this` and `other` are mutaully exclusive */
+bool TR::VPFloatConstraint::mustBeNotEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TR::VPFloatConstraint *otherFloat = other->asFloatConstraint();
+   if (otherFloat)
+      return FPCompare(getHigh(), otherFloat->getLow()) == -1 || 
+             FPCompare(getLow(), otherFloat->getHigh()) == 1;
+   TR::VPMergedConstraints *otherList = other->asMergedFloatConstraints();
+   if (otherList)
+      {
+      /* Must be not equal to each item in the list to be not equal to the list */
+      ListIterator<TR::VPConstraint> iter(otherList->getList());
+      for (TR::VPConstraint *c = iter.getFirst(); c; c = iter.getNext())
+         {
+         if (!mustBeNotEqual(c, vp))
+            return false;
+         }
+      return true;
+      }
+   return false;
+   }
+
+
+/* Check if `this` and `other` are mutaully exclusive */
+bool TR::VPDoubleConstraint::mustBeNotEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TR::VPDoubleConstraint *otherDouble = other->asDoubleConstraint();
+   if (otherDouble)
+      return FPCompare(getHigh(), otherDouble->getLow()) == -1 || 
+             FPCompare(getLow(), otherDouble->getHigh()) == 1;
+   TR::VPMergedConstraints *otherList = other->asMergedDoubleConstraints();
+   if (otherList)
+      {
+      /* Must be not equal to each item in the list to be not equal to the list */
+      ListIterator<TR::VPConstraint> iter(otherList->getList());
+      for (TR::VPConstraint *c = iter.getFirst(); c; c = iter.getNext())
+         {
+         if (!mustBeNotEqual(c, vp))
+            return false;
+         }
+      return true;
+      }
+   return false;
+   }
+
+
 bool TR::VPMergedConstraints::mustBeNotEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
    if (!other->asMergedConstraints())
@@ -5054,6 +5487,16 @@ bool TR::VPLongConstraint::mustBeLessThan(TR::VPConstraint *other, OMR::ValuePro
    return getHigh() < other->getLowLong();
    }
 
+bool TR::VPFloatConstraint::mustBeLessThan(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   return FPCompare(getHigh(), other->getLowFloat()) == -1;
+   }
+
+bool TR::VPDoubleConstraint::mustBeLessThan(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   return FPCompare(getHigh(), other->getLowDouble()) == -1;
+   }
+
 bool TR::VPMergedConstraints::mustBeLessThan(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
    if (_type.isInt16())
@@ -5093,6 +5536,18 @@ bool TR::VPIntConstraint::mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::Va
 bool TR::VPLongConstraint::mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
    return getHigh() <= other->getLowLong();
+   }
+   
+bool TR::VPFloatConstraint::mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   int32_t result = FPCompare(getHigh(),other->getLowFloat());
+   return result <= 0;
+   }
+
+bool TR::VPDoubleConstraint::mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   int32_t result = FPCompare(getHigh(),other->getLowDouble());
+   return result <= 0;
    }
 
 bool TR::VPMergedConstraints::mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
