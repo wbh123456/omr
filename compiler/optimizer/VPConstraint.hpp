@@ -31,6 +31,7 @@
 #include "infra/Assert.hpp"
 #include "infra/Bit.hpp"
 #include "infra/List.hpp"
+#include <cmath>
 
 class TR_FrontEnd;
 class TR_OpaqueClassBlock;
@@ -79,6 +80,7 @@ class VPConstraint
    virtual class VPLongConstraint    *asLongConstraint();
    virtual class VPLongConst         *asLongConst();
    virtual class VPLongRange         *asLongRange();
+   virtual class VPFloatConstraint   *asFloatConstraint();
    virtual class VP_BCDValue         *asBCDValue();
    virtual class VP_BCDSign          *asBCDSign();
    virtual class VPClass             *asClass();
@@ -99,6 +101,7 @@ class VPConstraint
    virtual class VPMergedConstraints *asMergedShortConstraints();
    virtual class VPMergedConstraints *asMergedIntConstraints();
    virtual class VPMergedConstraints *asMergedLongConstraints();
+   virtual class VPMergedConstraints *asMergedFloatConstraints();
    virtual class VPUnreachablePath   *asUnreachablePath();
    virtual class VPSync              *asVPSync();
    virtual class VPRelation          *asRelation();
@@ -149,6 +152,8 @@ class VPConstraint
    virtual int32_t getHighInt();
    virtual int64_t getLowLong();
    virtual int64_t getHighLong();
+   virtual float getLowFloat();
+   virtual float getHighFloat();
 
 
    virtual uint16_t getUnsignedLowShort();
@@ -212,11 +217,12 @@ class VPConstraint
 
    enum MergePriorities
       {
-      EqualPriority             = 19,
-      GreaterThanOrEqualPriority= 18,
-      LessThanOrEqualPriority   = 17,
-      NotEqualPriority          = 16,
-      MergedConstraintPriority  = 15,
+      EqualPriority             = 20,
+      GreaterThanOrEqualPriority= 19,
+      LessThanOrEqualPriority   = 18,
+      NotEqualPriority          = 17,
+      MergedConstraintPriority  = 16,
+      FloatConstraintPriority   = 15,
       ShortPriority             = 14,
       IntPriority               = 13,
       LongPriority              = 12,
@@ -309,6 +315,9 @@ class VPConstraint
 
       return diff;
       }
+      
+   float fpAddWithOverflow(float a, float b, bool& overflow);
+   float fpSubWithOverflow(float a, float b, bool& overflow);
 
    private:
    int32_t _mergePriority;
@@ -541,6 +550,38 @@ class VPLongRange : public TR::VPLongConstraint
    bool    _isPowerOfTwo;
    };
 
+class VPFloatConstraint : public TR::VPConstraint
+   {
+   public:
+   VPFloatConstraint(float v) : TR::VPConstraint(FloatConstraintPriority) {_low = v;}
+   virtual TR::VPFloatConstraint *asFloatConstraint();
+
+   float getFloat() {return _low;}
+   float getLow() {return _low;}
+   virtual float getHigh() = 0;
+   virtual float getLowFloat();
+   virtual float getHighFloat();
+
+   virtual TR::VPConstraint *merge1(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+   virtual TR::VPConstraint *intersect1(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual bool mustBeNotEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+   virtual bool mustBeLessThan(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+   virtual bool mustBeLessThanOrEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual TR::VPConstraint *add(TR::VPConstraint *other, TR::DataType type, OMR::ValuePropagation *vp);
+   virtual TR::VPConstraint *subtract(TR::VPConstraint *other, TR::DataType type, OMR::ValuePropagation *vp);
+
+   virtual TR_YesNoMaybe canOverflow() {return _overflow;}
+   virtual void setCanOverflow(TR_YesNoMaybe v) {_overflow = v;}
+
+   protected:
+   float _low;
+   TR_YesNoMaybe _overflow;
+
+   private:
+   TR::VPConstraint *getRange(float, float, bool, bool, OMR::ValuePropagation * vp);
+   };
 
 class VPClass : public TR::VPConstraint
    {
@@ -1023,6 +1064,7 @@ class VPMergedConstraints : public TR::VPConstraint
    virtual TR::VPMergedConstraints *asMergedShortConstraints();
    virtual TR::VPMergedConstraints *asMergedIntConstraints();
    virtual TR::VPMergedConstraints *asMergedLongConstraints();
+   virtual TR::VPMergedConstraints *asMergedFloatConstraints();
 
    virtual TR::VPConstraint *merge1(TR::VPConstraint *other, OMR::ValuePropagation *vp);
    virtual TR::VPConstraint *intersect1(TR::VPConstraint *other, OMR::ValuePropagation *vp);
@@ -1036,6 +1078,8 @@ class VPMergedConstraints : public TR::VPConstraint
    virtual int32_t getHighInt();
    virtual int64_t getLowLong();
    virtual int64_t getHighLong();
+   virtual float getLowFloat();
+   virtual float getHighFloat();
 
    virtual uint16_t getUnsignedLowShort();
    virtual uint16_t getUnsignedHighShort();
