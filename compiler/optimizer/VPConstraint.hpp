@@ -81,6 +81,7 @@ class VPConstraint
    virtual class VPLongConst         *asLongConst();
    virtual class VPLongRange         *asLongRange();
    virtual class VPFloatConstraint   *asFloatConstraint();
+   virtual class VPFloatConst        *asFloatConst();
    virtual class VP_BCDValue         *asBCDValue();
    virtual class VP_BCDSign          *asBCDSign();
    virtual class VPClass             *asClass();
@@ -581,6 +582,20 @@ class VPFloatConstraint : public TR::VPConstraint
 
    private:
    TR::VPConstraint *getRange(float, float, bool, bool, OMR::ValuePropagation * vp);
+   };
+
+class VPFloatConst : public TR::VPFloatConstraint
+   {
+   public:
+   VPFloatConst(float v) : TR::VPFloatConstraint(v) {}
+   static TR::VPFloatConst *create(OMR::ValuePropagation *vp, float v);
+   static TR::VPConstraint *createExclusion(OMR::ValuePropagation *vp, float v);
+   virtual TR::VPFloatConst *asFloatConst();
+   virtual float getHigh() {return _low;}
+   virtual bool mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual void print(TR::Compilation *, TR::FILE *);
+   virtual const char *name();
    };
 
 class VPClass : public TR::VPConstraint
