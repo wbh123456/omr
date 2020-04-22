@@ -23,6 +23,7 @@
 
 #include <ctype.h>
 #include <stddef.h>
+#include <math.h>
 #include "env/FrontEnd.hpp"
 #include "compile/Compilation.hpp"
 #include "compile/ResolvedMethod.hpp"
@@ -69,7 +70,9 @@ TR::VPLongConstraint    *TR::VPConstraint::asLongConstraint()    { return NULL; 
 TR::VPLongConst         *TR::VPConstraint::asLongConst()         { return NULL; }
 TR::VPLongRange         *TR::VPConstraint::asLongRange()         { return NULL; }
 TR::VPFloatConstraint   *TR::VPConstraint::asFloatConstraint()   { return NULL; }
+TR::VPFloatConst        *TR::VPConstraint::asFloatConst()        { return NULL; }
 TR::VPDoubleConstraint  *TR::VPConstraint::asDoubleConstraint()  { return NULL; }
+TR::VPDoubleConst       *TR::VPConstraint::asDoubleConst()       { return NULL; }
 TR::VP_BCDValue         *TR::VPConstraint::asBCDValue()          { return NULL; }
 TR::VP_BCDSign          *TR::VPConstraint::asBCDSign()           { return NULL; }
 TR::VPClass             *TR::VPConstraint::asClass()             { return NULL; }
@@ -108,7 +111,9 @@ TR::VPLongConstraint    *TR::VPLongConstraint::asLongConstraint()       { return
 TR::VPLongConst         *TR::VPLongConst::asLongConst()                 { return this; }
 TR::VPLongRange         *TR::VPLongRange::asLongRange()                 { return this; }
 TR::VPFloatConstraint   *TR::VPFloatConstraint::asFloatConstraint()     { return this; }
+TR::VPFloatConst        *TR::VPFloatConst::asFloatConst()               { return this; }
 TR::VPDoubleConstraint  *TR::VPDoubleConstraint::asDoubleConstraint()   { return this; }
+TR::VPDoubleConst       *TR::VPDoubleConst::asDoubleConst()             { return this; }
 TR::VPClass             *TR::VPClass::asClass()                         { return this; }
 TR::VPClassType         *TR::VPClassType::asClassType()                 { return this; }
 TR::VPResolvedClass     *TR::VPResolvedClass::asResolvedClass()         { return this; }
@@ -1255,6 +1260,85 @@ TR::VPLongConstraint *TR::VPLongRange::create(OMR::ValuePropagation *vp, int64_t
 
    return constraint;
    }
+
+
+TR::VPFloatConst *TR::VPFloatConst::create(OMR::ValuePropagation *vp, float v)
+   {
+   // If the constraint does not already exist, create it
+   //
+   std::hash<float> float_hash_func;
+   int32_t hash = ((uint32_t) float_hash_func(v)) % VP_HASH_TABLE_SIZE;
+   TR::VPFloatConst *constraint;
+   OMR::ValuePropagation::ConstraintsHashTableEntry *entry;
+   for (entry = vp->_constraintsHashTable[hash]; entry; entry = entry->next)
+      {
+      constraint = entry->constraint->asFloatConst();
+      if (constraint && constraint->_low == v)
+         return constraint;
+      }
+   constraint = new (vp->trStackMemory()) TR::VPFloatConst(v);
+   vp->addConstraint(constraint, hash);
+   return constraint;
+   }
+
+
+/* Create a complementary Constraint against the value v. 
+*/
+TR::VPConstraint *TR::VPFloatConst::createExclusion(OMR::ValuePropagation *vp, float v)
+   {
+   // TO-DO: Need to find a workaround for excluding a float number without using std::nextafter as the OMR AppVeyor build on github does not support std::nextafter function. 
+   // The std::nextafter int std library helps find the very next float representation to the current float.
+   // Currently we return a full range upon calling *TR::VPFloatConst::createExclusion(), as this is considered to be most conservative operation.
+
+   return NULL;
+
+   // if (TR::Compiler->arith.floatComparefloat(v, std::numeric_limits<float>::lowest()) == 0)
+   //    {
+   //    float immediateAfterNegINF = std::nextafter(std::numeric_limits<float>::lowest(), 0.0f);
+   //    return TR::VPIntRange::create(vp, immediateAfterNegINF, std::numeric_limits<float>::max());
+   //    }
+      
+   // if (TR::Compiler->arith.floatComparefloat(v, std::numeric_limits<float>::max()) == 0)
+   //    {
+   //    float immediateBeforePosINF = std::nextafter(std::numeric_limits<float>::max(), 0.0f);
+   //    return TR::VPIntRange::create(vp, std::numeric_limits<float>::lowest(), immediateBeforePosINF);
+   //    }
+
+   // float immediateBefore, immediateAfter;
+   // immediateBefore = std::nextafter(v, std::numeric_limits<float>::lowest());
+   // immediateAfter = std::nextafter(v, std::numeric_limits<float>::max());
+   // return TR::VPMergedConstraints::create(vp, TR::VPIntRange::create(vp, std::numeric_limits<float>::lowest(), immediateBefore), TR::VPIntRange::create(vp, immediateAfter, std::numeric_limits<float>::max()));
+   }
+
+
+TR::VPDoubleConst *TR::VPDoubleConst::create(OMR::ValuePropagation *vp, double v)
+   {
+   // If the constraint does not already exist, create it
+   //
+   std::hash<double> double_hash_func;
+   int32_t hash = ((uint32_t) double_hash_func(v)) % VP_HASH_TABLE_SIZE;
+   TR::VPDoubleConst *constraint;
+   OMR::ValuePropagation::ConstraintsHashTableEntry *entry;
+   for (entry = vp->_constraintsHashTable[hash]; entry; entry = entry->next)
+      {
+      constraint = entry->constraint->asDoubleConst();
+      if (constraint && constraint->_low == v)
+         return constraint;
+      }
+   constraint = new (vp->trStackMemory()) TR::VPDoubleConst(v);
+   vp->addConstraint(constraint, hash);
+   return constraint;
+   }
+
+
+/* Create a complementary Constraint against the value v. 
+*/
+TR::VPConstraint *TR::VPDoubleConst::createExclusion(OMR::ValuePropagation *vp, double v)
+   {
+   // TO-DO: see the comments in TR::VPFloatConst::createExclusion
+   return NULL;
+   }
+
 
 TR::VPConstraint *TR::VPClass::create(OMR::ValuePropagation *vp, TR::VPClassType *type, TR::VPClassPresence *presence,
                                     TR::VPPreexistentObject *preexistence, TR::VPArrayInfo *arrayInfo, TR::VPObjectLocation *location)
@@ -5196,6 +5280,18 @@ bool TR::VPLongConst::mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation
    return otherConst && otherConst->getLong() == getLong();
    }
 
+bool TR::VPFloatConst::mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TR::VPFloatConst *otherConst = other->asFloatConst();
+   return otherConst && otherConst->getFloat() == getFloat();
+   }
+
+bool TR::VPDoubleConst::mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
+   {
+   TR::VPDoubleConst *otherConst = other->asDoubleConst();
+   return otherConst && otherConst->getDouble() == getDouble();
+   }
+
 bool TR::VPClass::mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
    if (isNullObject() && other->isNullObject())
@@ -6229,6 +6325,23 @@ void TR::VPLongRange::print(TR::Compilation *comp, TR::FILE *outFile)
 
    }
 
+
+void TR::VPFloatConst::print(TR::Compilation * comp, TR::FILE *outFile)
+   {
+   if (outFile == NULL)
+       return;
+   trfprintf(outFile, "%f F ", getLow());
+   }
+
+
+void TR::VPDoubleConst::print(TR::Compilation * comp, TR::FILE *outFile)
+   {
+   if (outFile == NULL)
+       return;
+   trfprintf(outFile, "%d D ", getLow());
+   }
+
+
 void TR::VPClass::print(TR::Compilation *comp, TR::FILE *outFile)
    {
    if (outFile == NULL)
@@ -6493,6 +6606,8 @@ const char *TR::VPIntConst::name()                   { return "IntConst";       
 const char *TR::VPIntRange::name()                   { return "IntRange";             }
 const char *TR::VPLongConst::name()                  { return "LongConst";            }
 const char *TR::VPLongRange::name()                  { return "LongRange";            }
+const char *TR::VPFloatConst::name()                 { return "FloatConst";           }
+const char *TR::VPDoubleConst::name()                { return "DoubleConst";           }
 const char *TR::VPClass::name()                      { return "Class";                }
 const char *TR::VPResolvedClass::name()              { return "ResolvedClass";        }
 const char *TR::VPFixedClass::name()                 { return "FixedClass";           }

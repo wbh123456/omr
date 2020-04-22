@@ -81,7 +81,9 @@ class VPConstraint
    virtual class VPLongConst         *asLongConst();
    virtual class VPLongRange         *asLongRange();
    virtual class VPFloatConstraint   *asFloatConstraint();
+   virtual class VPFloatConst        *asFloatConst();
    virtual class VPDoubleConstraint  *asDoubleConstraint();
+   virtual class VPDoubleConst       *asDoubleConst();
    virtual class VP_BCDValue         *asBCDValue();
    virtual class VP_BCDSign          *asBCDSign();
    virtual class VPClass             *asClass();
@@ -156,8 +158,8 @@ class VPConstraint
    virtual int64_t getHighLong();
    virtual float getLowFloat();
    virtual float getHighFloat();
-   virtual float getLowDouble();
-   virtual float getHighDouble();
+   virtual double getLowDouble();
+   virtual double getHighDouble();
 
 
    virtual uint16_t getUnsignedLowShort();
@@ -635,6 +637,36 @@ class VPDoubleConstraint : public TR::VPConstraint
 
    virtual TR_YesNoMaybe canOverflow() {return _overflow;}
    virtual void setCanOverflow(TR_YesNoMaybe v) {_overflow = v;}
+   };
+
+
+class VPFloatConst : public TR::VPFloatConstraint
+   {
+   public:
+   VPFloatConst(float v) : TR::VPFloatConstraint(v) {}
+   static TR::VPFloatConst *create(OMR::ValuePropagation *vp, float v);
+   static TR::VPConstraint *createExclusion(OMR::ValuePropagation *vp, float v);
+   virtual TR::VPFloatConst *asFloatConst();
+   virtual float getHigh() {return _low;}
+   virtual bool mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual void print(TR::Compilation *, TR::FILE *);
+   virtual const char *name();
+   };
+
+
+class VPDoubleConst : public TR::VPDoubleConstraint
+   {
+   public:
+   VPDoubleConst(double v) : TR::VPDoubleConstraint(v) {}
+   static TR::VPDoubleConst *create(OMR::ValuePropagation *vp, double v);
+   static TR::VPConstraint *createExclusion(OMR::ValuePropagation *vp, double v);
+   virtual TR::VPDoubleConst *asDoubleConst();
+   virtual double getHigh() {return _low;}
+   virtual bool mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual void print(TR::Compilation *, TR::FILE *);
+   virtual const char *name();
    };
 
 
