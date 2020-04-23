@@ -71,6 +71,7 @@ TR::VPLongConst         *TR::VPConstraint::asLongConst()         { return NULL; 
 TR::VPLongRange         *TR::VPConstraint::asLongRange()         { return NULL; }
 TR::VPFloatConstraint   *TR::VPConstraint::asFloatConstraint()   { return NULL; }
 TR::VPFloatConst        *TR::VPConstraint::asFloatConst()        { return NULL; }
+TR::VPFloatRange        *TR::VPConstraint::asFloatRange()        { return NULL; }
 TR::VP_BCDValue         *TR::VPConstraint::asBCDValue()          { return NULL; }
 TR::VP_BCDSign          *TR::VPConstraint::asBCDSign()           { return NULL; }
 TR::VPClass             *TR::VPConstraint::asClass()             { return NULL; }
@@ -109,6 +110,7 @@ TR::VPLongConst         *TR::VPLongConst::asLongConst()                 { return
 TR::VPLongRange         *TR::VPLongRange::asLongRange()                 { return this; }
 TR::VPFloatConstraint   *TR::VPFloatConstraint::asFloatConstraint()     { return this; }
 TR::VPFloatConst        *TR::VPFloatConst::asFloatConst()               { return this; }
+TR::VPFloatRange        *TR::VPFloatRange::asFloatRange()               { return this; }
 TR::VPClass             *TR::VPClass::asClass()                         { return this; }
 TR::VPClassType         *TR::VPClassType::asClassType()                 { return this; }
 TR::VPResolvedClass     *TR::VPResolvedClass::asResolvedClass()         { return this; }
@@ -1222,6 +1224,37 @@ TR::VPConstraint *TR::VPFloatConst::createExclusion(OMR::ValuePropagation *vp, f
    // immediateBefore = std::nextafter(v, std::numeric_limits<float>::lowest());
    // immediateAfter = std::nextafter(v, std::numeric_limits<float>::max());
    // return TR::VPMergedConstraints::create(vp, TR::VPIntRange::create(vp, std::numeric_limits<float>::lowest(), immediateBefore), TR::VPIntRange::create(vp, immediateAfter, std::numeric_limits<float>::max()));
+   }
+
+TR::VPFloatConstraint *TR::VPFloatRange::create(OMR::ValuePropagation *vp, float low, float high, TR_YesNoMaybe canOverflow)
+   {
+   if (TR::Compiler->arith.floatComparefloat(low, std::numeric_limits<float>::lowest()) == 0 && 
+       TR::Compiler->arith.floatComparefloat(high, std::numeric_limits<float>::max()) == 0)
+      return NULL;
+
+   if (TR::Compiler->arith.floatComparefloat(low, high) == 0)
+      return TR::VPFloatConst::create(vp, low);
+
+   // If the constraint does not already exist, create it
+   //
+   std::hash<float> float_hash_func;
+   int32_t hash = ((uint32_t) float_hash_func(low) + (uint32_t) float_hash_func(high)) % VP_HASH_TABLE_SIZE;
+   TR::VPFloatRange *constraint;
+   OMR::ValuePropagation::ConstraintsHashTableEntry *entry;
+   for (entry = vp->_constraintsHashTable[hash]; entry; entry = entry->next)
+      {
+      constraint = entry->constraint->asFloatRange();
+      if (constraint &&
+            constraint->_low == low &&
+            constraint->_high == high &&
+            constraint->_overflow == canOverflow)
+         return constraint;
+      }
+   constraint = new (vp->trStackMemory()) TR::VPFloatRange(low, high);
+   constraint->setCanOverflow(canOverflow);
+   vp->addConstraint(constraint, hash);
+
+   return constraint;
    }
 
 TR::VPConstraint *TR::VPClass::create(OMR::ValuePropagation *vp, TR::VPClassType *type, TR::VPClassPresence *presence,
@@ -6038,6 +6071,21 @@ void TR::VPFloatConst::print(TR::Compilation * comp, TR::FILE *outFile)
    trfprintf(outFile, "%f F ", getLow());
    }
 
+void TR::VPFloatRange::print(TR::Compilation * comp, TR::FILE *outFile)
+   {
+   if (outFile == NULL)
+      return;
+
+   if (TR::Compiler->arith.floatComparefloat(getLow(), std::numeric_limits<float>::lowest()) == 0)
+         trfprintf(outFile, "(std::numeric_limits<float>::lowest() ");
+   else
+      trfprintf(outFile, "(%f ", getLow());
+   if (TR::Compiler->arith.floatComparefloat(getHigh(), std::numeric_limits<float>::max()) == 0)
+      trfprintf(outFile, "to std::numeric_limits<float>::max())F");
+   else
+      trfprintf(outFile, "to %f)F", getHigh());
+   }
+
 void TR::VPClass::print(TR::Compilation *comp, TR::FILE *outFile)
    {
    if (outFile == NULL)
@@ -6303,6 +6351,7 @@ const char *TR::VPIntRange::name()                   { return "IntRange";       
 const char *TR::VPLongConst::name()                  { return "LongConst";            }
 const char *TR::VPLongRange::name()                  { return "LongRange";            }
 const char *TR::VPFloatConst::name()                 { return "FloatConst";           }
+const char *TR::VPFloatRange::name()                 { return "FloatRange";           }
 const char *TR::VPClass::name()                      { return "Class";                }
 const char *TR::VPResolvedClass::name()              { return "ResolvedClass";        }
 const char *TR::VPFixedClass::name()                 { return "FixedClass";           }
