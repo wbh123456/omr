@@ -82,8 +82,10 @@ class VPConstraint
    virtual class VPLongRange         *asLongRange();
    virtual class VPFloatConstraint   *asFloatConstraint();
    virtual class VPFloatConst        *asFloatConst();
+   virtual class VPFloatRange        *asFloatRange();
    virtual class VPDoubleConstraint  *asDoubleConstraint();
    virtual class VPDoubleConst       *asDoubleConst();
+   virtual class VPDoubleRange       *asDoubleRange();
    virtual class VP_BCDValue         *asBCDValue();
    virtual class VP_BCDSign          *asBCDSign();
    virtual class VPClass             *asClass();
@@ -664,6 +666,49 @@ class VPDoubleConst : public TR::VPDoubleConstraint
    virtual TR::VPDoubleConst *asDoubleConst();
    virtual double getHigh() {return _low;}
    virtual bool mustBeEqual(TR::VPConstraint *other, OMR::ValuePropagation *vp);
+
+   virtual void print(TR::Compilation *, TR::FILE *);
+   virtual const char *name();
+   };
+
+class VPFloatRange : public TR::VPFloatConstraint
+   {
+        /*
+         * Data members
+         */
+   private:
+   float _high;
+
+        /*
+         * Function members
+         */
+   public:
+   VPFloatRange(float low, float high) : TR::VPFloatConstraint(low), _high(high) {}
+   static TR::VPFloatConstraint *create(OMR::ValuePropagation *vp, float low, float high, TR_YesNoMaybe canOverflow = TR_no);
+   virtual TR::VPFloatRange *asFloatRange();
+   virtual float getHigh() {return _high;}
+
+   virtual void print(TR::Compilation *, TR::FILE *);
+   virtual const char *name();
+   };
+
+
+class VPDoubleRange : public TR::VPDoubleConstraint
+   {
+        /*
+         * Data members
+         */
+   private:
+   double _high;
+
+        /*
+         * Function members
+         */
+   public:
+   VPDoubleRange(double low, double high) : TR::VPDoubleConstraint(low), _high(high) {}
+   static TR::VPDoubleConstraint *create(OMR::ValuePropagation *vp, double low, double high, TR_YesNoMaybe canOverflow = TR_no);
+   virtual TR::VPDoubleRange *asDoubleRange();
+   virtual double getHigh() {return _high;}
 
    virtual void print(TR::Compilation *, TR::FILE *);
    virtual const char *name();

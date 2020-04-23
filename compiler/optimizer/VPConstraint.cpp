@@ -71,8 +71,10 @@ TR::VPLongConst         *TR::VPConstraint::asLongConst()         { return NULL; 
 TR::VPLongRange         *TR::VPConstraint::asLongRange()         { return NULL; }
 TR::VPFloatConstraint   *TR::VPConstraint::asFloatConstraint()   { return NULL; }
 TR::VPFloatConst        *TR::VPConstraint::asFloatConst()        { return NULL; }
+TR::VPFloatRange        *TR::VPConstraint::asFloatRange()        { return NULL; }
 TR::VPDoubleConstraint  *TR::VPConstraint::asDoubleConstraint()  { return NULL; }
 TR::VPDoubleConst       *TR::VPConstraint::asDoubleConst()       { return NULL; }
+TR::VPDoubleRange       *TR::VPConstraint::asDoubleRange()       { return NULL; }
 TR::VP_BCDValue         *TR::VPConstraint::asBCDValue()          { return NULL; }
 TR::VP_BCDSign          *TR::VPConstraint::asBCDSign()           { return NULL; }
 TR::VPClass             *TR::VPConstraint::asClass()             { return NULL; }
@@ -112,8 +114,10 @@ TR::VPLongConst         *TR::VPLongConst::asLongConst()                 { return
 TR::VPLongRange         *TR::VPLongRange::asLongRange()                 { return this; }
 TR::VPFloatConstraint   *TR::VPFloatConstraint::asFloatConstraint()     { return this; }
 TR::VPFloatConst        *TR::VPFloatConst::asFloatConst()               { return this; }
+TR::VPFloatRange        *TR::VPFloatRange::asFloatRange()               { return this; }
 TR::VPDoubleConstraint  *TR::VPDoubleConstraint::asDoubleConstraint()   { return this; }
 TR::VPDoubleConst       *TR::VPDoubleConst::asDoubleConst()             { return this; }
+TR::VPDoubleRange       *TR::VPDoubleRange::asDoubleRange()             { return this; }
 TR::VPClass             *TR::VPClass::asClass()                         { return this; }
 TR::VPClassType         *TR::VPClassType::asClassType()                 { return this; }
 TR::VPResolvedClass     *TR::VPResolvedClass::asResolvedClass()         { return this; }
@@ -1337,6 +1341,70 @@ TR::VPConstraint *TR::VPDoubleConst::createExclusion(OMR::ValuePropagation *vp, 
    {
    // TO-DO: see the comments in TR::VPFloatConst::createExclusion
    return NULL;
+   }
+
+
+TR::VPFloatConstraint *TR::VPFloatRange::create(OMR::ValuePropagation *vp, float low, float high, TR_YesNoMaybe canOverflow)
+   {
+   if (FPCompare(low, TR::getMinFloat()) == 0 && 
+       FPCompare(high, TR::getMaxFloat()) == 0)
+      return NULL;
+
+   if (FPCompare(low, high) == 0)
+      return TR::VPFloatConst::create(vp, low);
+
+   // If the constraint does not already exist, create it
+   //
+   std::hash<float> float_hash_func;
+   int32_t hash = ((uint32_t) float_hash_func(low) + (uint32_t) float_hash_func(high)) % VP_HASH_TABLE_SIZE;
+   TR::VPFloatRange *constraint;
+   OMR::ValuePropagation::ConstraintsHashTableEntry *entry;
+   for (entry = vp->_constraintsHashTable[hash]; entry; entry = entry->next)
+      {
+      constraint = entry->constraint->asFloatRange();
+      if (constraint &&
+            constraint->_low == low &&
+            constraint->_high == high &&
+            constraint->_overflow == canOverflow)
+         return constraint;
+      }
+   constraint = new (vp->trStackMemory()) TR::VPFloatRange(low, high);
+   constraint->setCanOverflow(canOverflow);
+   vp->addConstraint(constraint, hash);
+
+   return constraint;
+   }
+
+
+TR::VPDoubleConstraint *TR::VPDoubleRange::create(OMR::ValuePropagation *vp, double low, double high, TR_YesNoMaybe canOverflow)
+   {
+   if (FPCompare(low, TR::getMinDouble()) == 0 && 
+       FPCompare(high, TR::getMaxDouble()) == 0)
+      return NULL;
+
+   if (FPCompare(low, high) == 0)
+      return TR::VPDoubleConst::create(vp, low);
+
+   // If the constraint does not already exist, create it
+   //
+   std::hash<double> double_hash_func;
+   int32_t hash = ((uint32_t) double_hash_func(low) + (uint32_t) double_hash_func(high)) % VP_HASH_TABLE_SIZE;
+   TR::VPDoubleRange *constraint;
+   OMR::ValuePropagation::ConstraintsHashTableEntry *entry;
+   for (entry = vp->_constraintsHashTable[hash]; entry; entry = entry->next)
+      {
+      constraint = entry->constraint->asDoubleRange();
+      if (constraint &&
+            constraint->_low == low &&
+            constraint->_high == high &&
+            constraint->_overflow == canOverflow)
+         return constraint;
+      }
+   constraint = new (vp->trStackMemory()) TR::VPDoubleRange(low, high);
+   constraint->setCanOverflow(canOverflow);
+   vp->addConstraint(constraint, hash);
+
+   return constraint;
    }
 
 
@@ -6341,6 +6409,35 @@ void TR::VPDoubleConst::print(TR::Compilation * comp, TR::FILE *outFile)
    trfprintf(outFile, "%d D ", getLow());
    }
 
+void TR::VPFloatRange::print(TR::Compilation * comp, TR::FILE *outFile)
+   {
+   if (outFile == NULL)
+      return;
+
+   if (FPCompare(getLow(), TR::getMinFloat()) == 0)
+         trfprintf(outFile, "(TR::getMinFloat() ");
+   else
+      trfprintf(outFile, "(%f ", getLow());
+   if (FPCompare(getHigh(), TR::getMaxFloat()) == 0)
+      trfprintf(outFile, "to TR::getMaxFloat())F");
+   else
+      trfprintf(outFile, "to %f)F", getHigh());
+   }
+
+void TR::VPDoubleRange::print(TR::Compilation * comp, TR::FILE *outFile)
+   {
+   if (outFile == NULL)
+      return;
+
+   if (FPCompare(getLow(), TR::getMinDouble()) == 0)
+         trfprintf(outFile, "(TR::getMinDouble() ");
+   else
+      trfprintf(outFile, "(%d ", getLow());
+   if (FPCompare(getHigh(), TR::getMaxDouble()) == 0)
+      trfprintf(outFile, "to TR::getMaxDouble())D");
+   else
+      trfprintf(outFile, "to %d)D", getHigh());
+   }
 
 void TR::VPClass::print(TR::Compilation *comp, TR::FILE *outFile)
    {
@@ -6607,7 +6704,9 @@ const char *TR::VPIntRange::name()                   { return "IntRange";       
 const char *TR::VPLongConst::name()                  { return "LongConst";            }
 const char *TR::VPLongRange::name()                  { return "LongRange";            }
 const char *TR::VPFloatConst::name()                 { return "FloatConst";           }
-const char *TR::VPDoubleConst::name()                { return "DoubleConst";           }
+const char *TR::VPFloatRange::name()                 { return "FloatRange";           }
+const char *TR::VPDoubleConst::name()                { return "DoubleConst";          }
+const char *TR::VPDoubleRange::name()                { return "DoubleRange";          }
 const char *TR::VPClass::name()                      { return "Class";                }
 const char *TR::VPResolvedClass::name()              { return "ResolvedClass";        }
 const char *TR::VPFixedClass::name()                 { return "FixedClass";           }
