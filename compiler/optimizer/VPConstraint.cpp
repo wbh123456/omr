@@ -2475,7 +2475,10 @@ TR::VPConstraint *TR::VPMergedConstraints::merge1(TR::VPConstraint *other, OMR::
       return intMerge(otherCur, otherNext, vp);
    if (_type.isInt64())
       return longMerge(otherCur, otherNext, vp);
-
+   if (_type.isFloat())
+      return floatMerge(otherCur, otherNext, vp);
+   if (_type.isDouble())
+      return doubleMerge(otherCur, otherNext, vp);
    return NULL;
    }
 
@@ -3009,6 +3012,232 @@ TR::VPConstraint *TR::VPMergedConstraints::longMerge(TR::VPConstraint *other, Li
       }
    return NULL;
    }
+
+TR::VPConstraint *TR::VPMergedConstraints::floatMerge(TR::VPConstraint * other, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation * vp)
+   {
+   TR::VPFloatConstraint *otherCur = other->asFloatConstraint();
+
+   TR_ScratchList<TR::VPConstraint>  result (vp->trMemory());
+   ListElement <TR::VPConstraint> *  next   = _constraints.getListHead();
+   TR::VPFloatConstraint          *  cur    = next->getData()->asFloatConstraint();
+   ListElement<TR::VPConstraint>  *  lastResultEntry = NULL;
+   TR::VPConstraint               *  mergeResult;
+
+   if (otherCur)
+      {
+      next = next->getNextElement();
+      while (cur || otherCur)
+         {
+         if (lastResultEntry &&
+             lastResultEntry->getData()->asFloatConstraint())
+            {
+            // Merge the last result entry with cur and/or otherCur
+            //
+            TR::VPFloatConstraint *lastResult = lastResultEntry->getData()->asFloatConstraint();
+            if (cur && (!otherCur || FPCompare(cur->getLow(), otherCur->getLow()) <= 0))
+               {
+               if (FPCompare(lastResult->getHigh(), TR::getMaxFloat()) == 0 || 
+                   FPCompare(cur->getLow(), lastResult->getHigh()) <= 0)
+                  {
+                  mergeResult = lastResult->merge(cur, vp);
+                  if (!mergeResult)
+                     return NULL;
+                  lastResultEntry->setData(mergeResult);
+                  }
+               else
+                  {
+                  lastResultEntry = result.addAfter(cur, lastResultEntry);
+                  }
+               if (next)
+                  {
+                  cur = next->getData()->asFloatConstraint();
+                  TR_ASSERT_FATAL(cur, "Expecting float constraints in floatMerge");
+                  next = next->getNextElement();
+                  }
+               else
+                  cur = NULL;
+               }
+            else
+               {
+               if (FPCompare(lastResult->getHigh(), TR::getMaxFloat()) == 0 || 
+                   FPCompare(otherCur->getLow(), lastResult->getHigh()) <= 0)
+                  {
+                  mergeResult = lastResult->merge(otherCur, vp);
+                  if (!mergeResult)
+                     return NULL;
+                  lastResultEntry->setData(mergeResult);
+                  }
+               else
+                  {
+                  lastResultEntry = result.addAfter(otherCur, lastResultEntry);
+                  }
+               if (otherNext)
+                  {
+                  otherCur = otherNext->getData()->asFloatConstraint();
+                  TR_ASSERT(otherCur, "Expecting float constraints in floatMerge");
+                  otherNext = otherNext->getNextElement();
+                  }
+               else
+                  otherCur = NULL;
+               }
+            }
+         else
+            {
+            // Put the lower of cur and otherCur into the result list
+            //
+            if (cur && (!otherCur || FPCompare(cur->getLow(), otherCur->getLow()) <= 0))
+               {
+               lastResultEntry = result.add(cur);
+               if (next)
+                  {
+                  cur = next->getData()->asFloatConstraint();
+                  TR_ASSERT(cur, "Expecting float constraints in floatMerge");
+                  next = next->getNextElement();
+                  }
+               else
+                  cur = NULL;
+               }
+            else
+               {
+               lastResultEntry = result.add(otherCur);
+               if (otherNext)
+                  {
+                  otherCur = otherNext->getData()->asFloatConstraint();
+                  TR_ASSERT(otherCur, "Expecting float constraints in floatMerge");
+                  otherNext = otherNext->getNextElement();
+                  }
+               else
+                  otherCur = NULL;
+               }
+            }
+         }
+
+      lastResultEntry = result.getListHead();
+      if (!lastResultEntry->getNextElement())
+         return lastResultEntry->getData();
+      return TR::VPMergedConstraints::create(vp, lastResultEntry);
+      }
+    else
+      {
+       TR_ASSERT_FATAL(false, "Merging float with another type");
+      }
+
+   return NULL;
+   }
+
+
+TR::VPConstraint *TR::VPMergedConstraints::doubleMerge(TR::VPConstraint * other, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation * vp)
+   {
+   TR::VPDoubleConstraint *otherCur = other->asDoubleConstraint();
+
+   TR_ScratchList<TR::VPConstraint>  result (vp->trMemory());
+   ListElement <TR::VPConstraint> *  next   = _constraints.getListHead();
+   TR::VPDoubleConstraint         *  cur    = next->getData()->asDoubleConstraint();
+   ListElement<TR::VPConstraint>  *  lastResultEntry = NULL;
+   TR::VPConstraint               *  mergeResult;
+
+   if (otherCur)
+      {
+      next = next->getNextElement();
+      while (cur || otherCur)
+         {
+         if (lastResultEntry &&
+             lastResultEntry->getData()->asDoubleConstraint())
+            {
+            // Merge the last result entry with cur and/or otherCur
+            //
+            TR::VPDoubleConstraint *lastResult = lastResultEntry->getData()->asDoubleConstraint();
+            if (cur && (!otherCur || FPCompare(cur->getLow(), otherCur->getLow()) <= 0))
+               {
+               if (FPCompare(lastResult->getHigh(), TR::getMaxDouble()) == 0 || 
+                   FPCompare(cur->getLow(), lastResult->getHigh()) <= 0)
+                  {
+                  mergeResult = lastResult->merge(cur, vp);
+                  if (!mergeResult)
+                     return NULL;
+                  lastResultEntry->setData(mergeResult);
+                  }
+               else
+                  {
+                  lastResultEntry = result.addAfter(cur, lastResultEntry);
+                  }
+               if (next)
+                  {
+                  cur = next->getData()->asDoubleConstraint();
+                  TR_ASSERT_FATAL(cur, "Expecting double constraints in doubleMerge");
+                  next = next->getNextElement();
+                  }
+               else
+                  cur = NULL;
+               }
+            else
+               {
+               if (FPCompare(lastResult->getHigh(), TR::getMaxDouble()) == 0 || 
+                   FPCompare(otherCur->getLow(), lastResult->getHigh()) <= 0)
+                  {
+                  mergeResult = lastResult->merge(otherCur, vp);
+                  if (!mergeResult)
+                     return NULL;
+                  lastResultEntry->setData(mergeResult);
+                  }
+               else
+                  {
+                  lastResultEntry = result.addAfter(otherCur, lastResultEntry);
+                  }
+               if (otherNext)
+                  {
+                  otherCur = otherNext->getData()->asDoubleConstraint();
+                  TR_ASSERT(otherCur, "Expecting double constraints in doubleMerge");
+                  otherNext = otherNext->getNextElement();
+                  }
+               else
+                  otherCur = NULL;
+               }
+            }
+         else
+            {
+            // Put the lower of cur and otherCur into the result list
+            //
+            if (cur && (!otherCur || FPCompare(cur->getLow(), otherCur->getLow()) <= 0))
+               {
+               lastResultEntry = result.add(cur);
+               if (next)
+                  {
+                  cur = next->getData()->asDoubleConstraint();
+                  TR_ASSERT(cur, "Expecting double constraints in doubleMerge");
+                  next = next->getNextElement();
+                  }
+               else
+                  cur = NULL;
+               }
+            else
+               {
+               lastResultEntry = result.add(otherCur);
+               if (otherNext)
+                  {
+                  otherCur = otherNext->getData()->asDoubleConstraint();
+                  TR_ASSERT(otherCur, "Expecting double constraints in doubleMerge");
+                  otherNext = otherNext->getNextElement();
+                  }
+               else
+                  otherCur = NULL;
+               }
+            }
+         }
+
+      lastResultEntry = result.getListHead();
+      if (!lastResultEntry->getNextElement())
+         return lastResultEntry->getData();
+      return TR::VPMergedConstraints::create(vp, lastResultEntry);
+      }
+    else
+      {
+       TR_ASSERT_FATAL(false, "Merging double with another type");
+      }
+
+   return NULL;
+   }
+
 
 TR::VPConstraint *TR::VPLessThanOrEqual::merge1(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {
@@ -4198,6 +4427,10 @@ TR::VPConstraint *TR::VPMergedConstraints::intersect1(TR::VPConstraint *other, O
       return intIntersect(otherCur, otherNext, vp);
    if (_type.isInt64())
       return longIntersect(otherCur, otherNext, vp);
+   if (_type.isFloat())
+      return floatIntersect(otherCur, otherNext, vp);
+   if (_type.isDouble())
+      return doubleIntersect(otherCur, otherNext, vp);
 
    return NULL;
    }
@@ -4755,6 +4988,191 @@ TR::VPConstraint *TR::VPMergedConstraints::longIntersect(TR::VPConstraint *other
       return TR::VPMergedConstraints::create(vp, lastResultEntry);
       }
    }
+
+   
+TR::VPConstraint *TR::VPMergedConstraints::floatIntersect(TR::VPConstraint *other, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp)
+   {
+   TR_ScratchList<TR::VPConstraint>         result(vp->trMemory());
+   ListElement<TR::VPConstraint> *next = _constraints.getListHead();
+   TR::VPFloatConstraint          *cur  = next->getData()->asFloatConstraint();
+   ListElement<TR::VPConstraint> *lastResultEntry = NULL;
+
+   TR::VPFloatConstraint *otherCur = other->asFloatConstraint();
+
+   if (otherCur)
+      {
+      float curLow = cur->getLow();
+      float curHigh = cur->getHigh();
+      float otherLow = otherCur->getLow();
+      float otherHigh = otherCur->getHigh();
+
+      next = next->getNextElement();
+      while (cur && otherCur)
+         {
+         bool skipCur      = false;
+         bool skipOtherCur = false;
+
+         // If the two current ranges do not overlap, skip the lower range and
+         // try again
+         //
+         if (FPCompare(curHigh, otherLow) == -1)
+            skipCur = true;
+         else if (FPCompare(otherHigh, curLow) == -1)
+            skipOtherCur = true;
+
+         else
+            {
+            // Put the intersection of the two current ranges into the result list
+            //
+            float resultLow = (FPCompare(curLow, otherLow) == 1) ? curLow : otherLow;
+            float resultHigh = (FPCompare(curHigh, otherHigh) == -1) ? curHigh : otherHigh;
+            lastResultEntry = result.addAfter(TR::VPFloatRange::create(vp, resultLow, resultHigh), lastResultEntry);
+
+            // Reduce the two current ranges. If either is exhausted, move to the
+            // next
+            //
+            if (FPCompare(resultHigh, TR::getMaxFloat()) == 0)
+               break;
+            curLow = otherLow = resultHigh;
+            if (FPCompare(curLow, curHigh) >= 0)
+               skipCur = true;
+            if (FPCompare(otherLow, otherHigh) >= 0)
+               skipOtherCur = true;
+            }
+
+         if (skipCur)
+            {
+            if (next)
+               {
+               cur = next->getData()->asFloatConstraint();
+               TR_ASSERT_FATAL(cur, "Expecting float constraints in floatIntersect");
+               next = next->getNextElement();
+               curLow = cur->getLow();
+               curHigh = cur->getHigh();
+               }
+            else
+               break;
+            }
+         if (skipOtherCur)
+            {
+            if (otherNext)
+               {
+               otherCur = otherNext->getData()->asFloatConstraint();
+               TR_ASSERT_FATAL(otherCur, "Expecting float constraints in floatIntersect");
+               otherNext = otherNext->getNextElement();
+               otherLow = otherCur->getLow();
+               otherHigh = otherCur->getHigh();
+               }
+            else
+               break;
+            }
+         }
+
+      lastResultEntry = result.getListHead();
+      if (!lastResultEntry)
+         return NULL;
+
+      // If only one entry, collapse the merged list into the single entry
+      //
+      if (!lastResultEntry->getNextElement())
+         return lastResultEntry->getData();
+
+      return TR::VPMergedConstraints::create(vp, lastResultEntry);
+      }
+   }
+
+
+TR::VPConstraint *TR::VPMergedConstraints::doubleIntersect(TR::VPConstraint *other, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp)
+   {
+   TR_ScratchList<TR::VPConstraint>         result(vp->trMemory());
+   ListElement<TR::VPConstraint> *next = _constraints.getListHead();
+   TR::VPDoubleConstraint          *cur  = next->getData()->asDoubleConstraint();
+   ListElement<TR::VPConstraint> *lastResultEntry = NULL;
+
+   TR::VPDoubleConstraint *otherCur = other->asDoubleConstraint();
+
+   if (otherCur)
+      {
+      double curLow = cur->getLow();
+      double curHigh = cur->getHigh();
+      double otherLow = otherCur->getLow();
+      double otherHigh = otherCur->getHigh();
+
+      next = next->getNextElement();
+      while (cur && otherCur)
+         {
+         bool skipCur      = false;
+         bool skipOtherCur = false;
+
+         // If the two current ranges do not overlap, skip the lower range and
+         // try again
+         //
+         if (FPCompare(curHigh, otherLow) == -1)
+            skipCur = true;
+         else if (FPCompare(otherHigh, curLow) == -1)
+            skipOtherCur = true;
+
+         else
+            {
+            // Put the intersection of the two current ranges into the result list
+            //
+            double resultLow = (FPCompare(curLow, otherLow) == 1) ? curLow : otherLow;
+            double resultHigh = (FPCompare(curHigh, otherHigh) == -1) ? curHigh : otherHigh;
+            lastResultEntry = result.addAfter(TR::VPDoubleRange::create(vp, resultLow, resultHigh), lastResultEntry);
+
+            // Reduce the two current ranges. If either is exhausted, move to the
+            // next
+            //
+            if (FPCompare(resultHigh, TR::getMaxDouble()) == 0)
+               break;
+            curLow = otherLow = resultHigh;
+            if (FPCompare(curLow, curHigh) >= 0)
+               skipCur = true;
+            if (FPCompare(otherLow, otherHigh) >= 0)
+               skipOtherCur = true;
+            }
+
+         if (skipCur)
+            {
+            if (next)
+               {
+               cur = next->getData()->asDoubleConstraint();
+               TR_ASSERT_FATAL(cur, "Expecting double constraints in doubleIntersect");
+               next = next->getNextElement();
+               curLow = cur->getLow();
+               curHigh = cur->getHigh();
+               }
+            else
+               break;
+            }
+         if (skipOtherCur)
+            {
+            if (otherNext)
+               {
+               otherCur = otherNext->getData()->asDoubleConstraint();
+               TR_ASSERT_FATAL(otherCur, "Expecting double constraints in doubleIntersect");
+               otherNext = otherNext->getNextElement();
+               otherLow = otherCur->getLow();
+               otherHigh = otherCur->getHigh();
+               }
+            else
+               break;
+            }
+         }
+
+      lastResultEntry = result.getListHead();
+      if (!lastResultEntry)
+         return NULL;
+
+      // If only one entry, collapse the merged list into the single entry
+      //
+      if (!lastResultEntry->getNextElement())
+         return lastResultEntry->getData();
+
+      return TR::VPMergedConstraints::create(vp, lastResultEntry);
+      }
+   }
+
 
 TR::VPConstraint *TR::VPLessThanOrEqual::intersect1(TR::VPConstraint *other, OMR::ValuePropagation *vp)
    {

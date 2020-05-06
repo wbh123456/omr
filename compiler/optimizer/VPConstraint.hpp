@@ -1185,10 +1185,22 @@ class VPMergedConstraints : public TR::VPConstraint
    public:
    VPMergedConstraints(ListElement<TR::VPConstraint> *first, TR_Memory * m)
       : TR::VPConstraint(MergedConstraintPriority),
-        _type((first && first->getData()->asShortConstraint() ? TR::Int16 : ((first && first->getData()->asLongConstraint()) ? TR::Int64 : TR::Int32))),
         _constraints(m)
       {
           _constraints.setListHead(first);
+          if (first)
+            {
+            if (first->getData()->asShortConstraint())
+               _type = TR::Int16;
+            else if (first->getData()->asIntConstraint())
+               _type = TR::Int32;
+            else if (first->getData()->asLongConstraint())
+               _type = TR::Int64;
+            else if (first->getData()->asFloatConstraint())
+               _type = TR::Float;
+            else if (first->getData()->asDoubleConstraint())
+               _type = TR::Double;
+            }
       }
    static TR::VPMergedConstraints *create(OMR::ValuePropagation *vp, TR::VPConstraint *first, TR::VPConstraint *second);
    static TR::VPMergedConstraints *create(OMR::ValuePropagation *vp, ListElement<TR::VPConstraint> *list);
@@ -1243,6 +1255,12 @@ class VPMergedConstraints : public TR::VPConstraint
    //TR::VPConstraint *intIntersect(TR::VPIntConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp, bool isUnsigned);
    TR::VPConstraint *longMerge(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
    TR::VPConstraint *longIntersect(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
+
+   TR::VPConstraint *floatMerge(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
+   TR::VPConstraint *floatIntersect(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
+
+   TR::VPConstraint *doubleMerge(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
+   TR::VPConstraint *doubleIntersect(TR::VPConstraint *otherCur, ListElement<TR::VPConstraint> *otherNext, OMR::ValuePropagation *vp);
 
    TR_ScratchList<TR::VPConstraint> _constraints;
    TR::DataType                    _type;
