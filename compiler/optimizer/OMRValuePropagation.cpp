@@ -2809,7 +2809,7 @@ void OMR::ValuePropagation::replaceByConstant(TR::Node *node, TR::VPConstraint *
          break;
       case TR::Float:
          TR::Node::recreate(node, TR::fconst);
-         node->setFloatBits(constraint->asIntConst()->getInt());
+         node->setFloat(constraint->asFloatConst()->getFloat());
          dumpOptDetails(comp(), " to fconst [float const]\n");
          break;
       case TR::Double:
