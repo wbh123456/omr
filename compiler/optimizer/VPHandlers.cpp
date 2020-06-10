@@ -841,9 +841,9 @@ TR::Node *constrainAConst(OMR::ValuePropagation *vp, TR::Node *node)
    return node;
    }
 
-static void constrainIntAndFloatConstHelper(OMR::ValuePropagation *vp, TR::Node *node, int32_t value, bool isGlobal)
+static void constrainIntConst(OMR::ValuePropagation *vp, TR::Node *node, bool isGlobal)
    {
-
+   int32_t value = node->getInt();
    if (value)
       {
       node->setIsNonZero(true);
@@ -862,22 +862,36 @@ static void constrainIntAndFloatConstHelper(OMR::ValuePropagation *vp, TR::Node 
    vp->addBlockOrGlobalConstraint(node, TR::VPIntConst::create(vp, value), isGlobal);
    }
 
-static void constrainIntConst(OMR::ValuePropagation *vp, TR::Node *node, bool isGlobal)
-   {
-   int32_t value = node->getInt();
-   constrainIntAndFloatConstHelper(vp, node, value, isGlobal);
-   }
-
 TR::Node *constrainIntConst(OMR::ValuePropagation *vp, TR::Node *node)
    {
    constrainIntConst(vp, node, true /* isGlobal */);
    return node;
    }
 
+static void constrainFloatConst(OMR::ValuePropagation *vp, TR::Node *node, bool isGlobal)
+   {
+   float value = node->getFloat();
+   if (value)
+      {
+      node->setIsNonZero(true);
+      if (value & std::numeric_limits<float>::lowest())
+         node->setIsNonPositive(true);
+      else
+         node->setIsNonNegative(true);
+      }
+   else
+      {
+      node->setIsZero(true);
+      node->setIsNonNegative(true);
+      node->setIsNonPositive(true);
+      }
+
+   vp->addBlockOrGlobalConstraint(node, TR::VPFloatConst::create(vp, value), isGlobal);
+   }
+
 TR::Node *constrainFloatConst(OMR::ValuePropagation *vp, TR::Node *node)
    {
-   int32_t value = node->getFloatBits();
-   constrainIntAndFloatConstHelper(vp, node, value, true /* isGlobal */);
+   constrainFloatConst(vp, node, true /* isGlobal */);
    return node;
    }
 
