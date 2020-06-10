@@ -165,7 +165,7 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainAConst,          // TR::aconst
    constrainIntConst,        // TR::iconst
    constrainLongConst,       // TR::lconst
-   constrainFloatConst,        // TR::fconst
+   constrainFloatConst,      // TR::fconst
    constrainLongConst,       // TR::dconst
    constrainByteConst,       // TR::bconst
    constrainShortConst,      // TR::sconst
