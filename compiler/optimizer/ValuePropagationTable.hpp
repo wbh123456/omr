@@ -242,13 +242,13 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainVcall,           // TR::call
    constrainAdd,             // TR::iadd
    constrainAdd,             // TR::ladd
-   constrainChildren,        // TR::fadd
+   constrainAdd,             // TR::fadd
    constrainChildren,        // TR::dadd
    constrainAdd,             // TR::badd
    constrainAdd,             // TR::sadd
    constrainSubtract,        // TR::isub
    constrainSubtract,        // TR::lsub
-   constrainChildren,        // TR::fsub
+   constrainSubtract,        // TR::fsub
    constrainChildren,        // TR::dsub
    constrainSubtract,        // TR::bsub
    constrainSubtract,        // TR::ssub
