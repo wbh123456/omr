@@ -896,6 +896,33 @@ TR::Node *constrainFloatConst(OMR::ValuePropagation *vp, TR::Node *node)
    return node;
    }
 
+static void constrainDoubleConst(OMR::ValuePropagation *vp, TR::Node *node, bool isGlobal)
+   {
+   double value = node->getDouble();
+   if (value)
+      {
+      node->setIsNonZero(true);
+      if (!std::signbit(value))
+         node->setIsNonPositive(true);
+      else
+         node->setIsNonNegative(true);
+      }
+   else
+      {
+      node->setIsZero(true);
+      node->setIsNonNegative(true);
+      node->setIsNonPositive(true);
+      }
+
+   vp->addBlockOrGlobalConstraint(node, TR::VPDoubleConst::create(vp, value), isGlobal);
+   }
+
+TR::Node *constrainDoubleConst(OMR::ValuePropagation *vp, TR::Node *node)
+   {
+   constrainDoubleConst(vp, node, true /* isGlobal */);
+   return node;
+   }
+
 static void constrainLongConst(OMR::ValuePropagation *vp, TR::Node *node, bool isGlobal)
    {
    int64_t value = node->getLongInt();

@@ -84,6 +84,7 @@ TR::Node *constrainInstanceOf(OMR::ValuePropagation *vp, TR::Node *node);
 TR::Node *constrainIntAndFloatConstHelper(OMR::ValuePropagation *vp, TR::Node *node, int32_t value);
 TR::Node *constrainIntConst(OMR::ValuePropagation *vp, TR::Node *node);
 TR::Node *constrainFloatConst(OMR::ValuePropagation *vp, TR::Node *node);
+TR::Node *constrainDoubleConst(OMR::ValuePropagation *vp, TR::Node *node);
 TR::Node *constrainIntLoad(OMR::ValuePropagation *vp, TR::Node *node);
 TR::Node *constrainIntStore(OMR::ValuePropagation *vp, TR::Node *node);
 TR::Node *constrainIor(OMR::ValuePropagation *vp, TR::Node *node);
@@ -166,7 +167,7 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainIntConst,        // TR::iconst
    constrainLongConst,       // TR::lconst
    constrainFloatConst,      // TR::fconst
-   constrainLongConst,       // TR::dconst
+   constrainDoubleConst,     // TR::dconst
    constrainByteConst,       // TR::bconst
    constrainShortConst,      // TR::sconst
    constrainIntLoad,         // TR::iload
