@@ -2814,7 +2814,7 @@ void OMR::ValuePropagation::replaceByConstant(TR::Node *node, TR::VPConstraint *
          break;
       case TR::Double:
          TR::Node::recreate(node, TR::dconst);
-         node->setLongInt(constraint->asLongConst()->getLong());
+         node->setDouble(constraint->asDoubleConst()->getDouble());
          dumpOptDetails(comp(), " to dconst [double const]\n");
          break;
       case TR::Address:

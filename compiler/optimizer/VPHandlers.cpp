@@ -5790,6 +5790,7 @@ TR::Node *constrainAdd(OMR::ValuePropagation *vp, TR::Node *node)
 
    bool longAdd = node->getOpCode().isLong();
    bool floatAdd = node->getOpCode().isFloat();
+   bool doubleAdd = node->getOpCode().isDouble();
 
    constrainChildren(vp, node);
 
@@ -5814,6 +5815,14 @@ TR::Node *constrainAdd(OMR::ValuePropagation *vp, TR::Node *node)
          if (floatAdd)
             {
             if (constraint->asFloatConst())
+               {
+               vp->replaceByConstant(node, constraint, lhsGlobal);
+               return node;
+               }
+            }
+         if (doubleAdd)
+            {
+            if (constraint->asDoubleConst())
                {
                vp->replaceByConstant(node, constraint, lhsGlobal);
                return node;
@@ -5891,6 +5900,7 @@ TR::Node *constrainSubtract(OMR::ValuePropagation *vp, TR::Node *node)
 
    bool longSub = node->getOpCode().isLong();
    bool floatSub = node->getOpCode().isFloat();
+   bool doubleSub = node->getOpCode().isDouble();
    constrainChildren(vp, node);
 
    bool lhsGlobal, rhsGlobal;
@@ -5914,6 +5924,14 @@ TR::Node *constrainSubtract(OMR::ValuePropagation *vp, TR::Node *node)
          else if (floatSub)
             {
             if (constraint->asFloatConst())
+               {
+               vp->replaceByConstant(node, constraint, lhsGlobal);
+               return node;
+               }
+            }
+         else if (doubleSub)
+            {
+            if (constraint->asDoubleConst())
                {
                vp->replaceByConstant(node, constraint, lhsGlobal);
                return node;
