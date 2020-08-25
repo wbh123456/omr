@@ -558,8 +558,6 @@ public:
 	static TR::Register *iustoreiEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *lustoreiEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *bustoreiEvaluator(TR::Node *node, TR::CodeGenerator *cg);
-	static TR::Register *iunegEvaluator(TR::Node *node, TR::CodeGenerator *cg);
-	static TR::Register *lunegEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *iushlEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *lushlEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *f2iuEvaluator(TR::Node *node, TR::CodeGenerator *cg);

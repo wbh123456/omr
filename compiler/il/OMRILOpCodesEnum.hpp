@@ -590,8 +590,6 @@
    iustorei, // store indirect unsigned integer       (child1 a, child2 i)
    lustorei, // store indirect unsigned long integer  (child1 a, child2 l)
    bustorei, // store indirect unsigned byte          (child1 a, child2 b)
-   iuneg,    // negate an unsigned integer
-   luneg,    // negate a unsigned long integer
    f2iu,     // convert float to unsigned integer
    f2lu,     // convert float to unsigned long integer
    f2bu,     // convert float to unsigned byte

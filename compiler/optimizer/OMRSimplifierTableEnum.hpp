@@ -552,8 +552,6 @@
    indirectStoreSimplifier, // TR::iustorei
    indirectStoreSimplifier, // TR::lustorei
    indirectStoreSimplifier, // TR::bustorei
-   inegSimplifier,          // TR::iuneg
-   lnegSimplifier,          // TR::luneg
    f2iSimplifier,           // TR::f2iu
    f2lSimplifier,           // TR::f2iu
    f2bSimplifier,           // TR::f2bu

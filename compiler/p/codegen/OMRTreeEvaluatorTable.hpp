@@ -535,8 +535,6 @@
    TR::TreeEvaluator::istoreEvaluator,                  // TR::iustorei
    TR::TreeEvaluator::lstoreEvaluator,                  // TR::lustorei
    TR::TreeEvaluator::bstoreEvaluator,                  // TR::bustorei
-   TR::TreeEvaluator::inegEvaluator,                    // TR::iuneg
-   TR::TreeEvaluator::lnegEvaluator,                    // TR::luneg
    TR::TreeEvaluator::d2iuEvaluator,                    // TR::f2iu
    TR::TreeEvaluator::unImpOpEvaluator,                 // TR::f2lu
    TR::TreeEvaluator::d2iuEvaluator,                    // TR::f2bu

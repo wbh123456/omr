@@ -373,10 +373,6 @@ private:
       {
       switch (opvalue) 
          {
-         //Add and Subtract
-         case TR::iuneg: 
-         case TR::luneg: 
-
          //Load
          case TR::buload:
          case TR::buloadi:
