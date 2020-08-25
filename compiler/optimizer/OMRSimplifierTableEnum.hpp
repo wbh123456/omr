@@ -605,9 +605,7 @@
    dftSimplifier,           // TR::luaddh
    caddSimplifier,          // TR::cadd
    iaddSimplifier,          // TR::aiadd
-   iaddSimplifier,          // TR::aiuadd
    laddSimplifier,          // TR::aladd
-   laddSimplifier,          // TR::aluadd
    dftSimplifier,           // TR::lusubh
    csubSimplifier,          // TR::csub
    imulhSimplifier,           // TR::imulh

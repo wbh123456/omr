@@ -2854,9 +2854,7 @@ int32_t childTypes[] =
    TR::Int64,                     // TR::luaddh
    TR::Int16,                     // TR::cadd
    TR::Address | (TR::Int32<<16),  // TR::aiadd
-   TR::Address | (TR::Int32<<16),  // TR::aiuadd
    TR::Address | (TR::Int64<<16),  // TR::aladd
-   TR::Address | (TR::Int64<<16),  // TR::aluadd
    TR::Int64,                     // TR::lusubh
    TR::Int16,                     // TR::csub
    TR::Int32,                     // TR::imulh

@@ -722,9 +722,7 @@
    TR::TreeEvaluator::badILOpEvaluator,     // TR::luaddh
    TR::TreeEvaluator::unImpOpEvaluator,     // TR::cadd
    TR::TreeEvaluator::iaddEvaluator,        // TR::aiadd
-   TR::TreeEvaluator::iaddEvaluator,        // TR::aiuadd
    TR::TreeEvaluator::iaddEvaluator,        // TR::aladd
-   TR::TreeEvaluator::iaddEvaluator,        // TR::aluadd
    TR::TreeEvaluator::badILOpEvaluator,     // TR::lusubh
    TR::TreeEvaluator::unImpOpEvaluator,     // TR::csub
    TR::TreeEvaluator::imulhEvaluator,       // TR::imulh
