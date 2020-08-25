@@ -695,8 +695,6 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainStore,           // TR::iustorei
    constrainStore,           // TR::lustorei
    constrainStore,           // TR::bustorei
-   constrainAdd,             // TR::luadd
-   constrainSubtract,        // TR::lusub
    constrainIneg,            // TR::iuneg
    constrainLneg,            // TR::luneg
    constrainChildren,        // TR::f2iu

@@ -8140,38 +8140,6 @@
    },
 
    {
-   /* .opcode               = */ TR::luadd,
-   /* .name                 = */ "luadd",
-   /* .properties1          = */ ILProp1::Commutative | ILProp1::Associative | ILProp1::Add,
-   /* .properties2          = */ ILProp2::ValueNumberShare | ILProp2::SupportedForPRE,
-   /* .properties3          = */ ILProp3::LikeUse,
-   /* .properties4          = */ 0,
-   /* .dataType             = */ TR::Int64,
-   /* .typeProperties       = */ ILTypeProp::Size_8 | ILTypeProp::Unsigned,
-   /* .childProperties      = */ TWO_SAME_CHILD(TR::Int64),
-   /* .swapChildrenOpCode   = */ TR::luadd,
-   /* .reverseBranchOpCode  = */ TR::BadILOp,
-   /* .booleanCompareOpCode = */ TR::BadILOp,
-   /* .ifCompareOpCode      = */ TR::BadILOp,
-   },
-
-   {
-   /* .opcode               = */ TR::lusub,
-   /* .name                 = */ "lusub",
-   /* .properties1          = */ ILProp1::Sub,
-   /* .properties2          = */ ILProp2::ValueNumberShare | ILProp2::SupportedForPRE,
-   /* .properties3          = */ ILProp3::LikeUse,
-   /* .properties4          = */ 0,
-   /* .dataType             = */ TR::Int64,
-   /* .typeProperties       = */ ILTypeProp::Size_8 | ILTypeProp::Unsigned,
-   /* .childProperties      = */ TWO_SAME_CHILD(TR::Int64),
-   /* .swapChildrenOpCode   = */ TR::BadILOp,
-   /* .reverseBranchOpCode  = */ TR::BadILOp,
-   /* .booleanCompareOpCode = */ TR::BadILOp,
-   /* .ifCompareOpCode      = */ TR::BadILOp,
-   },
-
-   {
    /* .opcode               = */ TR::iuneg,
    /* .name                 = */ "iuneg",
    /* .properties1          = */ ILProp1::Neg,

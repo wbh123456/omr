@@ -375,9 +375,7 @@ private:
          {
          //Add and Subtract
          case TR::iuneg: 
-         case TR::luadd: 
          case TR::luneg: 
-         case TR::lusub:
 
          //Load
          case TR::buload:

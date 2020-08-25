@@ -647,8 +647,6 @@
    TR::TreeEvaluator::istoreEvaluator,      // TR::iustorei
    TR::TreeEvaluator::lstoreEvaluator,      // TR::lustorei
    TR::TreeEvaluator::bstoreEvaluator,      // TR::bustorei
-   TR::TreeEvaluator::laddEvaluator,        // TR::luadd
-   TR::TreeEvaluator::lsubEvaluator,        // TR::lusub
    TR::TreeEvaluator::inegEvaluator,        // TR::iuneg
    TR::TreeEvaluator::lnegEvaluator,        // TR::luneg
 #if (defined(__VFP_FP__) && !defined(__SOFTFP__))
