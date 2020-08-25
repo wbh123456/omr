@@ -2803,10 +2803,8 @@ int32_t childTypes[] =
    TR::Int8 | (TR::Address<<8),    // TR::bustorei
    TR::Int32,                     // TR::iuadd
    TR::Int64,                     // TR::luadd
-   TR::Int8,                      // TR::buadd
    TR::Int32,                     // TR::iusub
    TR::Int64,                     // TR::lusub
-   TR::Int8,                      // TR::busub
    TR::Int32,                     // TR::iuneg
    TR::Int64,                     // TR::luneg
    TR::Float,                      // TR::f2iu

@@ -374,8 +374,6 @@ private:
       switch (opvalue) 
          {
          //Add and Subtract
-         case TR::buadd: 
-         case TR::busub: 
          case TR::cadd:
          case TR::csub: 
          case TR::iuadd: 

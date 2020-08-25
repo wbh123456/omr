@@ -592,10 +592,8 @@
    bustorei, // store indirect unsigned byte          (child1 a, child2 b)
    iuadd,    // add 2 unsigned integers
    luadd,    // add 2 unsigned long integers
-   buadd,    // add 2 unsigned bytes
    iusub,    // subtract 2 unsigned integers       (child1 - child2)
    lusub,    // subtract 2 unsigned long integers  (child1 - child2)
-   busub,    // subtract 2 unsigned bytes          (child1 - child2)
    iuneg,    // negate an unsigned integer
    luneg,    // negate a unsigned long integer
    f2iu,     // convert float to unsigned integer

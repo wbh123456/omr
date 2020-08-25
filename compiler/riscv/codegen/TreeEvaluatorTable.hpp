@@ -530,10 +530,8 @@
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::bustoreiEvaluator ,	// TR::bustorei		// store indirect unsigned byte          (child1 a; child2 b)
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::iuaddEvaluator ,	// TR::iuadd		// add 2 unsigned integers
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::luaddEvaluator ,	// TR::luadd		// add 2 unsigned long integers
-    TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::buaddEvaluator ,	// TR::buadd		// add 2 unsigned bytes
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::iusubEvaluator ,	// TR::iusub		// subtract 2 unsigned integers       (child1 - child2)
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::lusubEvaluator ,	// TR::lusub		// subtract 2 unsigned long integers  (child1 - child2)
-    TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::busubEvaluator ,	// TR::busub		// subtract 2 unsigned bytes          (child1 - child2)
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::iunegEvaluator ,	// TR::iuneg		// negate an unsigned integer
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::lunegEvaluator ,	// TR::luneg		// negate a unsigned long integer
     TR::TreeEvaluator::unImpOpEvaluator ,        // TODO:RV: Enable when Implemented: TR::TreeEvaluator::f2iuEvaluator ,	// TR::f2iu		// convert float to unsigned integer

@@ -533,10 +533,8 @@
    TR::TreeEvaluator::bstoreEvaluator,                                 // TR::bustorei
    TR::TreeEvaluator::integerAddEvaluator,                             // TR::iuadd
    TR::TreeEvaluator::integerAddEvaluator,                             // TR::luadd
-   TR::TreeEvaluator::baddEvaluator,                                   // TR::buadd
    TR::TreeEvaluator::integerSubEvaluator,                             // TR::iusub
    TR::TreeEvaluator::integerSubEvaluator,                             // TR::lusub
-   TR::TreeEvaluator::bsubEvaluator,                                   // TR::busub
    TR::TreeEvaluator::integerNegEvaluator,                             // TR::iuneg
    TR::TreeEvaluator::integerNegEvaluator,                             // TR::luneg
    TR::TreeEvaluator::f2iEvaluator,                                    // TR::f2iu
