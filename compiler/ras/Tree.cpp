@@ -2850,11 +2850,9 @@ int32_t childTypes[] =
    TR::NoType | (TR::Address<<8),   // TR::calli
    TR::NoType,                     // TR::fence
    TR::Int64,                     // TR::luaddh
-   TR::Int16,                     // TR::cadd
    TR::Address | (TR::Int32<<16),  // TR::aiadd
    TR::Address | (TR::Int64<<16),  // TR::aladd
    TR::Int64,                     // TR::lusubh
-   TR::Int16,                     // TR::csub
    TR::Int32,                     // TR::imulh
    TR::Int32,                     // TR::iumulh
    TR::Int64,                     // TR::lmulh

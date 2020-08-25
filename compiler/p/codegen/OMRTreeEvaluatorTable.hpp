@@ -584,11 +584,9 @@
    TR::TreeEvaluator::indirectCallEvaluator,            // TR::calli
    TR::TreeEvaluator::badILOpEvaluator,                    // TR::fence
    TR::TreeEvaluator::badILOpEvaluator,                    // TR::luaddh
-   TR::TreeEvaluator::badILOpEvaluator,                    // TR::cadd
    TR::TreeEvaluator::iaddEvaluator,                    // TR::aiadd
    TR::TreeEvaluator::laddEvaluator,                    // TR::aladd
    TR::TreeEvaluator::badILOpEvaluator,                    // TR::lusubh
-   TR::TreeEvaluator::badILOpEvaluator,                    // TR::csub
    TR::TreeEvaluator::imulhEvaluator,                   // TR::imulh
    TR::TreeEvaluator::imulhEvaluator,                   // TR::iumulh
    TR::TreeEvaluator::lmulhEvaluator,                   // TR::lmulh

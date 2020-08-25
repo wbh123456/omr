@@ -744,11 +744,9 @@ const ValuePropagationPtr constraintHandlers[] =
    constrainCall,            // TR::calli
    constrainChildren,        // TR::fence
    constrainChildren,        // TR::luaddh
-   constrainAdd,             // TR::cadd
    constrainAddressRef,      // TR::aiadd
    constrainAddressRef,      // TR::aladd
    constrainChildren,        // TR::lusubh
-   constrainSubtract,        // TR::csub
    constrainChildren,        // TR::imulh
    constrainChildren,        // TR::iumulh
    constrainChildren,        // TR::lmulh

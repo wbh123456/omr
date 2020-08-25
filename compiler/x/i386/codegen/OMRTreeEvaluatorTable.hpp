@@ -580,11 +580,9 @@
    TR::TreeEvaluator::indirectCallEvaluator,                           // TR::calli
    TR::TreeEvaluator::fenceEvaluator,                                  // TR::fence
    TR::TreeEvaluator::badILOpEvaluator,                                // TR::luaddh
-   TR::TreeEvaluator::caddEvaluator,                                   // TR::cadd
    TR::TreeEvaluator::integerAddEvaluator,                             // TR::aiadd
    TR::TreeEvaluator::badILOpEvaluator,                                // TR::aladd
    TR::TreeEvaluator::badILOpEvaluator,                                // TR::lusubh
-   TR::TreeEvaluator::csubEvaluator,                                   // TR::csub
    TR::TreeEvaluator::integerMulhEvaluator,                            // TR::imulh
    TR::TreeEvaluator::integerMulhEvaluator,                            // TR::iumulh
    TR::TreeEvaluator::integerPairMulEvaluator,                         // TR::lmulh   // NOTE: These use the mul (not mulh) evaluators

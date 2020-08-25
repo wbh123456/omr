@@ -608,11 +608,9 @@ public:
 	static TR::Register *calliEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *fenceEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *luaddhEvaluator(TR::Node *node, TR::CodeGenerator *cg);
-	static TR::Register *caddEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *aiaddEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *aladdEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *lusubhEvaluator(TR::Node *node, TR::CodeGenerator *cg);
-	static TR::Register *csubEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *imulhEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *iumulhEvaluator(TR::Node *node, TR::CodeGenerator *cg);
 	static TR::Register *lmulhEvaluator(TR::Node *node, TR::CodeGenerator *cg);

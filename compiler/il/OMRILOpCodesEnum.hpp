@@ -640,11 +640,9 @@
    calli,   // indirect call returning void (child1 is addr of function)
    fence,    // barrier to optimization
    luaddh,   // add 2 unsigned long integers (the high parts of prior luadd) as high part of 128bit addition.
-   cadd,     // add 2 unsigned short integers
    aiadd,    // add integer to address with address result (child1 a, child2 i)
    aladd,    // add long integer to address with address result (child1 a, child2 i) (64-bit only)
    lusubh,   // subtract 2 unsigned long integers (the high parts of prior lusub) as high part of 128bit subtraction.
-   csub,     // subtract 2 unsigned short integers (child1 - child2)
    imulh,    // multiply 2 integers, and return the high word of the product
    iumulh,   // multiply 2 unsigned integers, and return the high word of the product
    lmulh,    // multiply 2 long integers, and return the high word of the product

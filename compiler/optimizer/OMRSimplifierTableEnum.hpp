@@ -601,11 +601,9 @@
    dftSimplifier,           // TR::calli
    dftSimplifier,           // TR::fence
    dftSimplifier,           // TR::luaddh
-   caddSimplifier,          // TR::cadd
    iaddSimplifier,          // TR::aiadd
    laddSimplifier,          // TR::aladd
    dftSimplifier,           // TR::lusubh
-   csubSimplifier,          // TR::csub
    imulhSimplifier,           // TR::imulh
    dftSimplifier,           // TR::iumulh
    lmulhSimplifier,         // TR::lmulh
